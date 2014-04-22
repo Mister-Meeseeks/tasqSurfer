@@ -1,12 +1,27 @@
 #!/usr/bin/python
 
+def displayTree (traverseTree):
+    displayParams = DisplayParams()
+    displayLines = converToDisplayLines(traverseTree, displayParams)
+    DisplayFieldOutputter(displayLines)
+
+def convertToDisplayLines (traverseTree, displayParams):
+    return [DisplayHeaderFields()] + \
+        convertToBodyDisplayLines(traverseTree, displayParams)
+
+def convertToBodyDisplayLines (traverseTree, dislplayParams):
+    topFields = DisplayLineFields(traverseTree, displayParams)
+    subFields = map(lambda t: convertToBodyDisplayLines(t, displayParams), \
+                        traverseTree.subTrees)
+    return [topFields] + reduce(lambda x,y: x + y, subFields)
+
 class DisplayParams:
     def __init__ (self):
         self.maxDepth = 4
         self.descendSpaces = 2
         self.maxDescrChars = 100
 
-class DisplayFieldFormatter:
+class DisplayFieldOutputer:
     def __init__ (self, fieldLines):
         self.deriveFieldLens(fieldLines):
         self.printFieldLines(fieldLines)
