@@ -42,15 +42,12 @@ def commitRepoDirs (revisionController):
     revisionController.commit("Initialization")    
 
 def initTaskDir():
-    taskDir = retrieveRepoTaskPath()
-    createPointerOnDisk(formTaskTreePath(taskDir))
-    createPointerOnDisk(formTaskStagePath(taskDir))
+    createPointerOnDisk(retrieveTaskTreePath())
+    createPointerOnDisk(retrieveTaskStagePath())
 
 def initViewDir():
-    viewDir = retrieveRepoViewPath()
-    TreeView().writeToStore(formTreeViewPath(viewDir))
-    TreeView().writeToStore(formStageTreeViewPath(viewDir))
+    TreeView().writeToStore(retrieveTreeViewPath())
+    TreeView().writeToStore(retrieveStageViewPath())
 
 def initUniqueDir():
-    uniqueDir = retrieveRepoUniqueIDPath()
-    uniqueIDTracker().writeToStore(formTaskIDPath(uniqueDir))
+    uniqueIDTracker().writeToStore(retrieveTaskIDPath())

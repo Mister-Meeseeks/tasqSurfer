@@ -61,7 +61,10 @@ class RelativePathLocate:
         self.basePath = basePath
 
     def getFullPath (self):
-        return self.basePath + self.subPath
+        return self.appendPath(self.basePath, self.subPath)
+
+    def getFullPath (self, childPath):
+        return self.appendPath(self.getFullPath(), childPath)
 
     def changePath (self, pathStr):
         targetPath = self.formTargetPath(pathStr)

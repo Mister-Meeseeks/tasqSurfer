@@ -22,7 +22,11 @@ def ineqToCmp (x, y):
     return 1 if x > y else -1
 
 def traverseView (treeView):
-    topTask = assembleTaskAtom(treeView.relativePath.getFullPath())
+    return traverseView(treeView, "")
+
+def traverseView (treeView, childPathPath):
+    topPointer = taskPointer(treeView.relativePath.getFullPath(childPath))
+    topTask = assembleTaskAtom(topPointer)
     return organizeTraverse(traverseTask(topTask, 0))
 
 def organizeTraverse (taskTree, treeView):

@@ -111,6 +111,15 @@ def assembleTaskPointer: (parentPointer, atomName):
 def createTaskPointer (parentPointer, atomName):
     return createPointerOnDisk(assembleTaskPointer(parentPointer, atomName))
 
+def createTaskAtom (parentPointer, atomName, description):
+    taskAtom = createTaskAtom(parentPointer, atomName)
+    return addAndWriteTaskDescription(taskAtom, description)
+
+def addAndWriteTaskDescription (taskAtom, description):
+    taskAtom.taskProperties.description = description
+    taskAtom.taskProperties.writeToStore()
+    return taskAtom
+
 def createTaskAtom (parentPointer, atomName):
     taskPointer = createTaskPointer(parentPointer, atomName)
     return assembleTaskAtom(taskPointer)
