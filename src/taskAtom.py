@@ -124,7 +124,7 @@ def createTaskAtom (parentPointer, atomName):
     taskPointer = createTaskPointer(parentPointer, atomName)
     return assembleTaskAtom(taskPointer)
 
-def assembleTaskAtom (parentPointer, atomName):
+def assembleTaskAtomOnParent (parentPointer, atomName):
     taskPointer = assembleTaskPointer(parentPointer, atomName)
     return assembleTaskAtomFromPointer(taskPointer)
 

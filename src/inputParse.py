@@ -77,7 +77,7 @@ def convertTargetIdxStrToPointer (targetStr, treeView):
     return treeView.userIdxView.userIdxToPointer[targetIdx]
 
 def convertTargetPathStrToPointer (targetStr, treeView):
-    return treeView.relativePath.getFullPath(targetStr)
+    return treeView.relativePath.getFullChild(targetStr)
 
 def isIdxTargetStr (targetStr):
     try:

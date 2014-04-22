@@ -34,7 +34,7 @@ def execAddCommand (addCmd):
 def execListCommand (listCmd):
     treeView = TreeView(retrieveTreeViewPath())
     listPointer = convertTargetStrToPointer(listCmd.target, treeView)
-    taskTree = traverseView(treeView, listPointer)
+    taskTree = traverseViewChild(treeView, listPointer)
     displayTree(taskTree)
     treeView.writeToStore()
 

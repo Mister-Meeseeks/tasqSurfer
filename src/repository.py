@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+from revisionControl import *
 
 def lookupRepoPath():
     defaultRepoPath = "~/.tasqSurfer"
@@ -17,7 +18,7 @@ def changeDirToTargetRepo (repoPath):
     else:
         cdExtantRepoDir(repoPath)
 
-def ddExtrantRepoDir (repoPath):
+def cdExtrantRepoDir (repoPath):
     os.chdir(repoPath)
 
 def initAndCdRepoDir (repoPath):
@@ -28,7 +29,7 @@ def initAndCdRepoDir (repoPath):
 def initRepoRevision (repoPath):
     revisionControlInit(repoPath)
 
-def initRepoDirs (revisionController):
+def initRepoDirs():
     createRepoDirs()
     commitRepoDirs()
 
@@ -37,7 +38,7 @@ def createRepoDirs():
     initViewDir()
     initUniqueDir()
 
-def commitRepoDirs (revisionController):
+def commitRepoDirs():
     revisionControlAdd(".")
     revisionController.commit("Initialization")    
 

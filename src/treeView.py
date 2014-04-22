@@ -63,7 +63,7 @@ class RelativePathLocate:
     def getFullPath (self):
         return self.appendPath(self.basePath, self.subPath)
 
-    def getFullPath (self, childPath):
+    def getFullChild (self, childPath):
         return self.appendPath(self.getFullPath(), childPath)
 
     def changePath (self, pathStr):
