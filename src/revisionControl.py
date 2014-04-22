@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import os
+
 def revisionControlInit (initPath):
     os.system("git init " + initPath)
 
@@ -9,6 +11,9 @@ def revisionControlAdd (addPath):
 def revisionControlCommit (commitMsg):
     escapedMsg = commitMsg.replace("\"", "\\\"")
     os.system("git commit -a -m \"%s\"" % escapedMsg)
+
+def revisionControlCommitWords (commitMsgWords):
+    revisionControlCommit(" ".join(commitMsgWords))
 
 def revisionControlMove (source, target):
     os.system("git mv %s %s" % (source, target))
