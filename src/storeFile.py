@@ -3,7 +3,7 @@
 def writeString (dataStr, filePath):
     writeStrings([dataStr], filePath)
 
-def writeString (dataStrs, filePath):
+def writeStrings (dataStrs, filePath):
     outStream = open(filePath, 'w')
     for dataStr in dataStrs:
         print >> outStream, dataStr

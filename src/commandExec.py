@@ -3,9 +3,9 @@
 def execCommand (args):
     subCommand = extractSubCommand(args)
     subArgs = estractSubCommandArgs(args)
-    execCommand(subCommand, subArgs)
+    execCommandArgs(subCommand, subArgs)
 
-def execCommand (subCommand, subArgs):
+def execCommandArgs (subCommand, subArgs):
     if (subCommand in addCommandKeywords):
         execAddCommand(AddCommand(subArgs))
     elif (subCommand in listCommandKeywords):
@@ -28,7 +28,7 @@ def execCommand (subCommand, subArgs):
 def execAddCommand (addCmd):
     treeView = TreeView(retrieveTreeViewPath())
     parentPointer = convertTargetStrToPointer(addCmd.parentTareget, treeView)
-    taskAtom = createTaskAtom(parentPointer, addCmd.name, addCmd.descr)
+    taskAtom = createTaskAtomDescribed(parentPointer, addCmd.name, addCmd.descr)
     revisionControlAdd(taskAtom.taskPointer.path)
 
 def execListCommand (listCmd):
@@ -75,7 +75,7 @@ def execStageListCommand (stageCmd):
 def execStageAddCommand (stageCmd):
     stageView = TreeView(retrieveStageViewPath())
     parentPointer = convertTargetStrToPointer("", stageView)
-    taskAtom = createTaskAtom(parentPointer, addCmd.name, addCmd.descr)
+    taskAtom = createTaskAtomDescribed(parentPointer, addCmd.name, addCmd.descr)
     revisionControlAdd(taskAtom.taskPointer.path)
 
 def execUnstageCommand (unstageCmd):

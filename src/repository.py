@@ -9,9 +9,9 @@ def lookupRepoPath():
     return os.path.expanduser(repoPathSet)
 
 def changeDirToRepo():
-    changeDirToRepo(lookupRepoPath())
+    changeDirToTargetRepo(lookupRepoPath())
 
-def changeDirToRepo (repoPath):
+def changeDirToTargetRepo (repoPath):
     if (not os.path.isdir(repoPath)):
         initAndCdRepoDir(repoPath)
     else:

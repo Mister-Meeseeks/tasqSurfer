@@ -27,7 +27,7 @@ def createPointerOnDisk (taskPointer):
     createPointerPropertiesOnDisk(taskPointer)
     return taskPointer
 
-def createPointerOnDisk (taskPointer):
+def createPointerDirOnDisk (taskPointer):
     makeDirectory(taskPointer.basePath)
 
 def createPointerPropertiesOnDisk (taskPointer):
@@ -111,7 +111,7 @@ def assembleTaskPointer: (parentPointer, atomName):
 def createTaskPointer (parentPointer, atomName):
     return createPointerOnDisk(assembleTaskPointer(parentPointer, atomName))
 
-def createTaskAtom (parentPointer, atomName, description):
+def createTaskAtomDescribed (parentPointer, atomName, description):
     taskAtom = createTaskAtom(parentPointer, atomName)
     return addAndWriteTaskDescription(taskAtom, description)
 
