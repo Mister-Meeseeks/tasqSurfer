@@ -1,0 +1,7 @@
+#!/usr/bin/python
+
+import sys
+
+changeDirToRepo()
+execCommand(sys.argv)
+revisionControlCommit(sys.argv)
