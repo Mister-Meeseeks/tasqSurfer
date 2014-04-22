@@ -4,6 +4,7 @@ class TaskTree:
     def __init__ (self, taskPointer, depth):
         self.taskAtom = assembleTaskAtom(taskPointer)
         self.subTrees = []
+        self.viewIdx = None
         self.depth = depth
 
     def sortSubTreesCreateDate (self):
@@ -14,7 +15,7 @@ class TaskTree:
         map(lambda x: x.sortSubTreesFn(atomCmpFn), self.subTrees)
 
     def trackUserIdxView (self, userIdxView):
-        userIdxView.addTaskPointer(self.taskAtom.taskPointer)
+        self.viewIdx = userIdxView.addTaskPointer(self.taskAtom.taskPointer)
         map(lambda x: x.trackUserIdxView(userIdxView): self.subTrees)
 
 def ineqToCmp (x, y):

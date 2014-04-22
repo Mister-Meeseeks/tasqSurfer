@@ -18,7 +18,7 @@ class TreeView:
 class UserIdxView:
     def __init__ (self):
         self.nextUserIdx = 0
-        self.userIdxToPointers = {}
+        self.userIdxToPointer = {}
 
     def __init__ (self, userIdxPath):
         self.nextUserIdx = 0
@@ -27,19 +27,19 @@ class UserIdxView:
             self.addPreSpecMapping(int(fields[0]), fields[1])
 
     def addPreSpecMapping (self, userIdx, taskPath):
-        self.userIdxToPointers[userIdx] = TaskPointer(taskPath)
+        self.userIdxToPointer[userIdx] = TaskPointer(taskPath)
         self.nextUserIdx = max(self.nextUserIdx, userIdx)
 
     def addTaskPointer (self, taskPointer):
         lastUserIdx = self.nextUserIdx
-        self.userIdxToPointers[self.nextUserIdx] = taskPointer
+        self.userIdxToPointer[self.nextUserIdx] = taskPointer
         self.nextUserIdx = self.nextUserIdx + 1
         return lastUserIdx
 
     def writeToStore (self, outPath):
         mapStream = open(outPath, 'w')
-        for userIdx in self.userIdxToPointers:
-            taskPointer = self.userIdxToPointers[userIdx]
+        for userIdx in self.userIdxToPointer:
+            taskPointer = self.userIdxToPointer[userIdx]
             print >> mapStream, "%d,%s" % (userIdx, taskPointer.path)
 
 class RelativePathLocate:

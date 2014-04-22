@@ -71,20 +71,27 @@ class TaskProperties:
         self.writeStrings(map(blockFromStr, self.blocks), taskPointer.blockPath)
         self.writeSTring(str(self.taskID), taskPointer.taskIDPath)
 
-def dateFromString (self, dateStr):
+def dateFromString (dateStr):
     dateFields = map(int, dateStr.split(","))
     d = date(dateFields[0], dateFields[1], dateFields[2])
     t = time(dateFields[3], dateFields[4], dateFields[5], dateFields[6])
     return datetime.combine(d, t)
 
-def dateToString (self, dateTime):
+def dateToString (dateTime):
     return "%d,%d,%d,%d,%d,%d,%d" % (year, month, day, hour, \
                                          minute, second, microsecond)
 
-def blockFromStr (self, blockStr):
+def diffDateToNow (dateOne):
+    return diffDates(datetime.now() - dateOne)
+
+def diffDates (dateOne, dateTwo):
+    dateDelta = dateOne - dateTwo
+    return (dateDelta.days, dateDelta.seconds)
+
+def blockFromStr (blockStr):
     raise Exception('Block not implemented: %s' % blockStr)
 
-def blockToStr (self, block):
+def blockToStr (block):
     raise Exception('Block not implemented')
 
 def pullSubTasks (taskPointer):
