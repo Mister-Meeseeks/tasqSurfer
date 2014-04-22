@@ -1,49 +1,39 @@
 #!/usr/bin/python
 
 class TaskTree:
-    def __init__ (self, taskPointer):
+    def __init__ (self, taskPointer, depth):
         self.taskAtom = assembleTaskAtom(taskPointer)
         self.subTrees = []
-        self.depth = None
+        self.depth = depth
 
-    def appendTree (self, taskTree):
-        taskTree.incrementDepth()
-        self.subTrees.append(taskTree)
+    def sortSubTreesCreateDate (self):
+        self.sortSubTreesFn(lambda x,y: ineqToCmp(x.createDate, y.createDate))
 
-    def appendTrees (self, taskTrees):
-        for taskTree in taskTrees:
-            self.appendTree(taskTree)
+    def sortSubTreesFn (self, atomCmpFn):
+        self.subTrees.sort(lambda x,y: atomCmpFn(x.taskAtom, y.t)skAtom))
+        map(lambda x: x.sortSubTreesFn(atomCmpFn), self.subTrees)
+
+    def trackUserIdxView (self, userIdxView):
+        userIdxView.addTaskPointer(self.taskAtom.taskPointer)
+        map(lambda x: x.trackUserIdxView(userIdxView): self.subTrees)
+
+def ineqToCmp (x, y):
+    return 1 if x > y else -1
 
 def traverseView (treeView):
     topTask = assembleTaskAtom(treeView.relativePath.getFullPath())
-    return traverseTask(topTask)
+    return organizeTraverse(traverseTask(topTask, 0))
 
-def traverseTask (taskPointer):
-    TaskTree taskTree (taskPointer)
-    subTrees = traverseDepthTasks(taskTree)
-    taskTree.appendTrees(subTrees)
+def organizeTraverse (taskTree, treeView):
+    taskTree.sortSubTreesCreateDate()
+    taskTree.trackUserIdxView(treeView.userIdxView)
     return taskTree
 
-def traverseDepthTasks (subTasks, params, dirDepth):
-    return traverseSubTasks(subTasks, params, dirDepth) \
-        if hasMoreDepth(params, dirDepth) else []        
+def traverseTask (taskPointer, dirDepth):
+    TaskTree taskTree (taskPointer, dirDepth)
+    taskTree.subTrees = traverseSubTasks(taskTree, dirDepth+1)
+    return taskTree
 
-def traverseSubTasks (subTasks, params, dirDepth):
-    return map(traverseView, subTasks)
-
-def markTreePositions (taskTree, treeView):
-    markTreePositions(taskTree, treeView, 1)
-
-def markTreePositions (taskTree, treeView, depth):
-    markTreePointer(taskTree, treeView)
-    taskTree.markDepth(depth)
-    markSubTrees(taskTree, treeView, depth)
-
-def markTreePointer (taskTree, treeView):
-    taskPointer = taskTree.taskAtom.taskPointer
-    treeView.userIdxView.addTaskPointer(taskPointer)
-    
-def markSubTrees (taskTree, treeView, depth):
-    map(lambda t: markTreePositions(t, treeView, depth+1), \
-            taskTree.subTrees)
+def traverseSubTasks (subTasks, dirDepth):
+    return map(lambda p: traverseTask(p, dirDepth), subTasks)
 
