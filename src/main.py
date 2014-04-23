@@ -6,5 +6,5 @@ from repository import *
 from revisionControl import *
 
 changeDirToRepo()
-execCommand(sys.argv)
+CommandExec().execCommand(sys.argv)
 revisionControlCommit(sys.argv)

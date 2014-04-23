@@ -1,100 +1,106 @@
 #!/usr/bin/python
 
-def execCommand (args):
-    subCommand = extractSubCommand(args)
-    subArgs = estractSubCommandArgs(args)
-    execCommandArgs(subCommand, subArgs)
+from inputParse import *
+from uniqueID import *
+from taskAtom import *
+from treeView import *
+from traverse import *
 
-def execCommandArgs (subCommand, subArgs):
-    if (subCommand in addCommandKeywords):
-        execAddCommand(AddCommand(subArgs))
-    elif (subCommand in listCommandKeywords):
-        execListCommand(ListCommand(subArgs))
-    elif (subCommand in cdCommandKeywords):
-        execCdCommand(CdCommand(subArgs))
-    elif (subCommand in moveCommandKeywords):
-        execMoveCommand(MoveCommand(subArgs))
-    elif (subCommand in doneCommandKeywords):
-        execDoneCommand(DoneCommand(subArgs))
-    elif (subCommand in rmCommandKeywords):
-        execRmCommand(RmCommand(subArgs))
-    elif (subCommand in stageCommandKeywords):
-        execStageCommand(StageCommand(subArgs))
-    elif (subCommand in unstageCommandKeywords):
-        execUnstageCommand(UnstageCommand(subArgs))
-    else:
-        raiseUnknownCommand(subCommand)
+class CommandExec:
+    def __init__ (self):
+        self.taskIDTracker = UniqueIDTracker(formUniqueIDTaskPath())
+        self.taskTree = TaskAtom(TaskPointer(formTaskTreePath()), 
+                                 self.taskIDTracker)
+        self.taskStage = TaskAtom(TaskPointer(formTaskStagePath()),
+                                  self.taskIDTracker)
+        self.treeView = TreeView(self.taskTree.taskPointer.path, \
+                                     formTreeViewPath())
+        self.stageView = TreeView(self.taskStage.taskPointer.path, \
+                                      formStageViewPath())
 
-def execAddCommand (addCmd):
-    treeView = TreeView(retrieveTreeViewPath())
-    parentPointer = convertTargetStrToPointer(addCmd.parentTareget, treeView)
-    taskAtom = createTaskAtomDescribed(parentPointer, addCmd.name, addCmd.descr)
-    revisionControlAdd(taskAtom.taskPointer.path)
+    def execCommand (self, args):
+        subCommand = extractSubCommand(args)
+        subArgs = extractSubCommandArgs(args)
+        self.execCommandArgs(subCommand, subArgs)
 
-def execListCommand (listCmd):
-    treeView = TreeView(retrieveTreeViewPath())
-    listPointer = convertTargetStrToPointer(listCmd.target, treeView)
-    taskTree = traverseViewChild(treeView, listPointer)
-    displayTree(taskTree)
-    treeView.writeToStore()
+    def execCommandArgs (self, subCommand, subArgs):
+        if (subCommand in addCommandKeywords):
+            self.execAddCommand(AddCommand(subArgs))
+        elif (subCommand in listCommandKeywords):
+            self.execListCommand(ListCommand(subArgs))
+        elif (subCommand in cdCommandKeywords):
+            self.execCdCommand(CdCommand(subArgs))
+        elif (subCommand in moveCommandKeywords):
+            self.execMoveCommand(MoveCommand(subArgs))
+        elif (subCommand in doneCommandKeywords):
+            self.execDoneCommand(DoneCommand(subArgs))
+        elif (subCommand in rmCommandKeywords):
+            self.execRmCommand(RmCommand(subArgs))
+        elif (subCommand in stageCommandKeywords):
+            self.execStageCommand(StageCommand(subArgs))
+        elif (subCommand in unstageCommandKeywords):
+            self.execUnstageCommand(UnstageCommand(subArgs))
+        else:
+            self.raiseUnknownCommand(subCommand)
 
-def execCdCommand (cdCmd):
-    treeView = TreeView(retrieveTreeViewPath())
-    cdPointer = convertTargetStrToPointer(cdCmd.target, treeView)
-    treeView.relativePath.changePath(cdPointer)
-    treeView.writeToStore()
+    def execAddCommand (self, addCmd):
+        parentPointer = convertTargetStr(addCmd.parentTareget, self.treeView)
+        taskAtom = createTaskPointerOnParent(parentPointer, addCmd.name)
+        addAndWriteTaskDescription(taskAtom, addCmd.descr)
+        revisionControlAdd(taskAtom.taskPointer.path)
 
-def execMoveCommand (moveCmd):
-    treeView = TreeView(retrieveTreeViewPath())
-    sourcePtr = convertTargetStrToPointer(moveCmd.source, treeView)
-    targetPtr = convertTargetStrToPointer(moveCmd.target, treeView)
-    revisionControlMove(sourcePtr.path, targetPtr.path)
+    def execListCommand (self, listCmd):
+        listPointer = convertTargetStr(listCmd.target, self.treeView)
+        taskTree = traverseViewChild(self.treeView, listPointer)
+        displayTree(taskTree)
+        
+    def execCdCommand (self, cdCmd):
+        cdPointer = convertTargetStr(cdCmd.target, self.treeView)
+        self.treeView.relativePath.changePath(cdPointer)
+        
+    def execMoveCommand (self, moveCmd):
+        sourcePtr = convertTargetStr(moveCmd.source, self.treeView)
+        targetPtr = convertTargetStr(moveCmd.target, self.treeView)
+        revisionControlMove(sourcePtr.path, targetPtr.path)
 
-def execDoneCommand (doneCmd):
-    treeView = TreeView(retrieveTreeViewPath())
-    sourcePtr = convertTargetStrToPointer(doneCmd.source, treeView)
-    revisionControlRm(sourcePtr.path)
+    def execDoneCommand (self, doneCmd):
+        sourcePtr = convertTargetStr(doneCmd.source, self.treeView)
+        revisionControlRm(sourcePtr.path)
 
-def execRmCommand (rmCmd):
-    treeView = TreeView(retrieveTreeViewPath())
-    sourcePtr = convertTargetStrToPointer(rmCmd.source, treeView)
-    revisionControlRm(sourcePtr.path)
+    def execRmCommand (self, rmCmd):
+        sourcePtr = convertTargetStrToPointer(rmCmd.source, self.treeView)
+        revisionControlRm(sourcePtr.path)
 
-def execStageCommand (stageCmd):
-    if (stageCmd.name == ""):
-        execStageListCommand(stageCmd)
-    else:
-        execStageAddCommand(stageCmd)
+    def execStageCommand (self, stageCmd):
+        if (stageCmd.name == ""):
+            self.execStageListCommand(stageCmd)
+        else:
+            sel.execStageAddCommand(stageCmd)
 
-def execStageListCommand (stageCmd):
-    stageView = TreeView(retrieveStageViewPath())
-    taskTree = traverseView(stageView)
-    displayTree(taskTree)
-    stageView.writeToStore()
+    def execStageListCommand (self, stageCmd):
+        taskTree = traverseView(self.stageView)
+        displayTree(taskTree)
+        
+    def execStageAddCommand (self, stageCmd):
+        tqaskPointer = createTaskPointerOnParent(self.taskTree, addCmd.name)
+        taskAtom = TaskAtom(taskPointer, self.taskIDTracker)
+        addAndWriteTaskDescription(taskAtom, addCmd.descr)
+        revisionControlAdd(taskAtom.taskPointer.path)
+        
+    def execUnstageCommand (self, unstageCmd):
+        if (unstageCmd.treeParentPointer == ""):
+            self.execUnstageRmCommand(unstageCmd)
+        else:
+            self.execUnstageAddCommand(unstageCmd)
 
-def execStageAddCommand (stageCmd):
-    stageView = TreeView(retrieveStageViewPath())
-    parentPointer = convertTargetStrToPointer("", stageView)
-    taskAtom = createTaskAtomDescribed(parentPointer, addCmd.name, addCmd.descr)
-    revisionControlAdd(taskAtom.taskPointer.path)
+    def execUnstageRmCommand (self, unstageCmd):
+        sourcePtr = convertTargetStr(unstageCmd.source, self.stageView)
+        revisionControlRm(sourcePtr.path)    
 
-def execUnstageCommand (unstageCmd):
-    if (unstageCmd.treeParentPointer == ""):
-        execUnstageRmCommand(unstageCmd)
-    else:
-        execUnstageAddCommand(unstageCmd)
+    def execUnstageAddCommand (self, unstageCmd):
+        sourcePtr = convertTargetStr(unstageCmd.source, self.stageView)
+        targetPtr = convertTargetStr(unstageCmd.target, self.treeView)
+        revisionControlMv(sourcePtr.path, targetPtr.path)
 
-def execUnstageRmCommand (unstageCmd):
-    stageView = TreeView(retrieveStageViewPath())
-    sourcePtr = convertTargetStrToPointer(unstageCmd.source, stageView)
-    revisionControlRm(sourcePtr.path)    
-
-def execUnstageAddCommand (unstageCmd):
-    stageView = TreeView(retrieveStageViewPath())
-    treeView = TreeView(retrieveTreeViewPath())
-    sourcePtr = convertTargetStrToPointer(unstageCmd.source, stageView)
-    targetPtr = convertTargetStrToPointer(unstageCmd.source, treeView)
-    revisionControlMv(sourcePtr.path, targetPtr.path)
-
-def raiseUnknownCommand (subCommand):
-    raise Exception("Uknown command type: %s" % subCommand)
+    def raiseUnknownCommand (self, subCommand):
+        raise Exception("Uknown command type: %s" % subCommand)

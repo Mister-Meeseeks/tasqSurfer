@@ -54,7 +54,7 @@ class ListCommand:
         self.target = cmdWords[0] if len(cmdWords) > 0 else ""
 
 class CdCommand:
-    def __init __ (self, cmdWords):
+    def __init__ (self, cmdWords):
         self.target = cmdWords[0]
 
 class StageCommand:
@@ -67,7 +67,7 @@ class UnstageCommand:
         self.stagePointer = cmdWords[0]
         self.treeParentPointer = cmdWords[1] if len(cmdWords) > 1 else ""
 
-def convertTargetStrToPointer (targetStr, treeView):
+def convertTargetStr (targetStr, treeView):
     return convertTargetIdxStrToPointer(targetStr, treeView) \
         if isIdxTargetStr(targetStr) else \
         convertTargetPathStrToPointer(targetStr, treeView)
@@ -77,11 +77,11 @@ def convertTargetIdxStrToPointer (targetStr, treeView):
     return treeView.userIdxView.userIdxToPointer[targetIdx]
 
 def convertTargetPathStrToPointer (targetStr, treeView):
-    return treeView.relativePath.getFullChild(targetStr)
+    return treeView.relativeLocation.getFullChild(targetStr)
 
 def isIdxTargetStr (targetStr):
     try:
-        int(s)
+        int(targetStr)
         return True
     except ValueError:
         return False

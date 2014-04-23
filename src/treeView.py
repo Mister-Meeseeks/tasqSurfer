@@ -1,34 +1,27 @@
 #!/usr/bin/python
 
-class TreeView:
-    def __init__ (self):
-        self.userIdxView = UserIdxView()
-        self.relativePath = RelativePathLocate()
+from storeFile import *
+from dirLayout import *
+from taskAtom import *
 
-    def __init__ (self, treeStoreDir):
-        userIdxPathStore = formUserIdxStore(treeStoreDir)
-        relativePathStore = formRelativePathStore(treeStoreDir)
-        self.userIdxView = UserIdxView(userIdxPathStore)
-        self.relativePath = RelativePathLocate(relativePathStore)
+class TreeView (DirectoryOwner):
+    def __init__ (self, treeViewRootPath, treeStoreDirPath):
+        DirectoryOwner.__init__(self, treeStoreDirPath)
+        self.userIdxView = UserIdxView(formUserIdxViewPath(self.path))
+        self.relativeLocation = RelativeLocation\
+            (treeViewRootPath, formRelativeLocationPath(self.path))
 
-    def writeToStore (self, treeStoreDir):
-        self.userIdxView.writeToStore(treeStoreDir)
-        self.relativePath.writeToStore(treeStoreDir)
+    def saveToStore (self):
+        self.userIdxView.saveToStore()
+        self.relativeLocation.saveToStore()
 
-class UserIdxView:
-    def __init__ (self):
-        self.nextUserIdx = 0
-        self.userIdxToPointer = {}
-
-    def __init__ (self, userIdxPath):
-        self.nextUserIdx = 0
-        for line in open(userIdxPath, 'r').readlines():
-            fields = line.split(",")
-            self.addPreSpecMapping(int(fields[0]), fields[1])
-
-    def addPreSpecMapping (self, userIdx, taskPath):
-        self.userIdxToPointer[userIdx] = TaskPointer(taskPath)
-        self.nextUserIdx = max(self.nextUserIdx, userIdx)
+class UserIdxView (DirectoryOwner):
+    def __init__ (self, userIdxViewPath):
+        DirectoryOwner.__init__(self, userIdxViewPath)
+        self.userIdxToPointerPath = formUserIdxToPointerPath(self.path)
+        self.userIdxToPointer = FileStoreDict(self.userIdxToPointerPath, {},
+                                              int, TaskPointer)
+        self.nextUserIdx = self.deriveNextUserIdx(self.userIdxToPointer.value)
 
     def addTaskPointer (self, taskPointer):
         lastUserIdx = self.nextUserIdx
@@ -36,49 +29,55 @@ class UserIdxView:
         self.nextUserIdx = self.nextUserIdx + 1
         return lastUserIdx
 
-    def writeToStore (self, outPath):
-        mapStream = open(outPath, 'w')
-        for userIdx in self.userIdxToPointer:
-            taskPointer = self.userIdxToPointer[userIdx]
-            print >> mapStream, "%d,%s" % (userIdx, taskPointer.path)
+    def deriveNextUserIdx (self, userIdxToPointer):
+        maxUserIdx = 0
+        for userIdx in userIdxToPointer:
+            maxUserIdx = max(maxUserIdx, userIdx)
+        return maxUserIdx+1
 
-class RelativePathLocate:
-    def __init__ (self):
-        self.basePath = None
-        self.subPath = "/"
+    def saveToStore (self):
+        self.userIdxToPointer.saveToStore()
 
-    def __init__ (self, storePath):
-        storeStream = open(storePath, 'r')
-        self.basePath = storeStream.readline()
-        self.subPath = storeStream.readline()
+def pointerMapFromStr (mapStr):
+    return pointerMapFromStrs(splitStringLines(mapStr))
 
-    def writeToStore (self, storePath):
-        storeStream = open(storePath, 'w')
-        print >> storeStream, self.basePath
-        print >> storeStream, self.subPath
+def pointerMapFromStrs (mapStrs):
+    retDict = {}
+    for mapStr in mapStrs:
+        mapFields = mapStr.split("\t")
+        retDict[int(mapFields[0])] = TaskPointer(mapFields[1])
+    return retDict
 
-    def setBasePath (self, basePath):
-        self.basePath = basePath
+class RelativeLocation (DirectoryOwner):
+    def __init__ (self, baseLocationPath, storePath):
+        DirectoryOwner.__init__(self, storePath)
+        self.baseLocationPath = baseLocationPath
+        self.subLocationPath = FileStoreSingle\
+            (formSubLocationPath(storePath), "/")
+
+    def saveToStore (self):
+        self.subLocationPath.saveToStore()
 
     def getFullPath (self):
-        return self.appendPath(self.basePath, self.subPath)
+        return self.appendPath(self.baseLocationPath, \
+                                   self.subLocationPath.value)
 
     def getFullChild (self, childPath):
         return self.appendPath(self.getFullPath(), childPath)
 
     def changePath (self, pathStr):
         targetPath = self.formTargetPath(pathStr)
-        self.subPath = self.cleanPath(targetPath)
+        self.subLocationPath.value = self.cleanPath(targetPath)
 
     def formTargetPath (self, pathStr):
         pathStr if self.isAbsolutePath(pathStr) \
-            else self.appendPath(self.subPath, pathStr)
+            else self.appendPath(self.subLocationPath.value, pathStr)
 
     def isAbsolutePath (self, pathStr):
         return len(pathStr) == 0 or pathStr[0] == "/"
 
     def appendPath (self, leftPath, rightPath):
-        return self.leftPath + "/" + self.rightPath
+        return leftPath + "/" + rightPath
 
     def cleanPath (self, pathStr):
         pathFields = pathStr.split("/")
@@ -86,17 +85,3 @@ class RelativePathLocate:
         pathFields = filter(lambda x: x == ".", pathFields)
         pathFields = reduce(lambda x,y: x[:-1] if y == ".." else x + [y])
         return pathFields
-
-def createTreeViewOnDisk (viewBaseDir, storeDir):
-    createTreeViewDirOnDisk(storeDir)
-    treeView = createTreeViewInst(viewBaseDir)
-    treeView.writeToStore(storeDir)
-    return treeView
-
-def createTreeViewInst (viewBaseDir):
-    treeView = TreeView()
-    treeView.relativePath.setBasePath(viewBaseDir)
-    return treeView
-
-def createTreeViewDirOnDisk (storeDir):
-    makeDirectory(storeDir)

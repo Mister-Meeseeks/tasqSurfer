@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
 import os
+from dirLayout import *
 from revisionControl import *
+from taskAtom import *
 
 def lookupRepoPath():
     defaultRepoPath = "~/.tasqSurfer"
@@ -18,37 +20,12 @@ def changeDirToTargetRepo (repoPath):
     else:
         cdExtantRepoDir(repoPath)
 
-def cdExtrantRepoDir (repoPath):
+def cdExtantRepoDir (repoPath):
     os.chdir(repoPath)
 
 def initAndCdRepoDir (repoPath):
     initRepoRevision(repoPath)
-    cdExtrantRepoDir(repoPath)
-    initRepoDirs()
+    cdExtantRepoDir(repoPath)
 
 def initRepoRevision (repoPath):
     revisionControlInit(repoPath)
-
-def initRepoDirs():
-    createRepoDirs()
-    commitRepoDirs()
-
-def createRepoDirs():
-    initTaskDir()
-    initViewDir()
-    initUniqueDir()
-
-def commitRepoDirs():
-    revisionControlAdd(".")
-    revisionController.commit("Initialization")    
-
-def initTaskDir():
-    createPointerOnDisk(retrieveTaskTreePath())
-    createPointerOnDisk(retrieveTaskStagePath())
-
-def initViewDir():
-    TreeView().writeToStore(retrieveTreeViewPath())
-    TreeView().writeToStore(retrieveStageViewPath())
-
-def initUniqueDir():
-    uniqueIDTracker().writeToStore(retrieveTaskIDPath())
