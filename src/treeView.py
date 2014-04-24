@@ -66,6 +66,14 @@ class RelativeLocation (DirectoryOwner):
                                    self.subLocationPath.value)
 
     def getFullChild (self, childPath):
+        return self.getFullAbsolute(childPath) \
+            if self.isAbsolutePath(childPath) else \
+            self.getFullRelative(childPath)
+
+    def getFullAbsolute (self, childPath):
+        return self.appendPath(self.baseLocationPath, childPath)
+    
+    def getFullRelative (self, childPath):
         return self.appendPath(self.getFullPath(), childPath)
 
     def changePathRepo (self, pathStr):
@@ -87,7 +95,7 @@ class RelativeLocation (DirectoryOwner):
             else self.appendPath(self.subLocationPath.value, pathStr)
 
     def isAbsolutePath (self, pathStr):
-        return len(pathStr) == 0 or pathStr[0] == "/"
+        return len(pathStr) > 0 and pathStr[0] == "/"
 
     def appendPath (self, leftPath, rightPath):
         return leftPath + "/" + rightPath

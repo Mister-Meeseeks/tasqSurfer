@@ -57,15 +57,19 @@ class CdCommand:
     def __init__ (self, cmdWords):
         self.target = cmdWords[0]
 
+class PwdCommand:
+    def __init__ (self, pwdWords):
+        self.empty = None
+
 class StageCommand:
     def __init__ (self, cmdWords):
-        self.name = args[0] if len(cmdWords) > 0 else ""
-        self.descr = args[1] if len(cmdWords) > 1 else ""
+        self.name = cmdWords[0] if len(cmdWords) > 0 else ""
+        self.descr = cmdWords[1] if len(cmdWords) > 1 else ""
 
 class UnstageCommand:
     def __init__ (self, cmdWords):
-        self.stagePointer = cmdWords[0]
-        self.treeParentPointer = cmdWords[1] if len(cmdWords) > 1 else ""
+        self.source = cmdWords[0]
+        self.treeParent = cmdWords[1] if len(cmdWords) > 1 else ""
 
 def convertTargetStr (targetStr, treeView):
     return convertTargetIdxStrToPointer(targetStr, treeView) \

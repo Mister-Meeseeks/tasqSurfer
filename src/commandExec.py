@@ -53,7 +53,7 @@ class CommandExec:
         elif (subCommand in doneCommandKeywords):
             self.execDoneCommand(DoneCommand(subArgs))
         elif (subCommand in rmCommandKeywords):
-            self.execRmCommand(RmCommand(subArgs))
+            self.execRmCommand(RemoveCommand(subArgs))
         elif (subCommand in stageCommandKeywords):
             self.execStageCommand(StageCommand(subArgs))
         elif (subCommand in unstageCommandKeywords):
@@ -88,7 +88,7 @@ class CommandExec:
         self.resetForTaskInvalidation()
 
     def execRmCommand (self, rmCmd):
-        targetPtr = convertTargetStrToPointer(rmCmd.target, self.treeView)
+        targetPtr = convertTargetStr(rmCmd.target, self.treeView)
         revisionControlRm(targetPtr)
         self.resetForTaskInvalidation()
 
@@ -103,13 +103,13 @@ class CommandExec:
         displayTree(taskTree)
         
     def execStageAddCommand (self, stageCmd):
-        tqaskPointer = createTaskPointerOnParent(self.taskTree, addCmd.name)
+        parentPointer = convertTargetStr("", self.stageView)
+        taskPointer = createTaskPointerOnParent(parentPointer, stageCmd.name)
         taskAtom = TaskAtom(taskPointer, self.taskIDTracker)
-        addAndWriteTaskDescription(taskAtom, addCmd.descr)
-        revisionControlAdd(taskAtom.taskPointer)
-        
+        addAndWriteTaskDescription(taskAtom, stageCmd.descr)
+                
     def execUnstageCommand (self, unstageCmd):
-        if (unstageCmd.treeParentPointer == ""):
+        if (unstageCmd.treeParent == ""):
             self.execUnstageRmCommand(unstageCmd)
         else:
             self.execUnstageAddCommand(unstageCmd)
@@ -117,12 +117,12 @@ class CommandExec:
     def execUnstageRmCommand (self, unstageCmd):
         targetPtr = convertTargetStr(unstageCmd.source, self.stageView)
         self.resetForTaskInvalidation()
-        revisionControlRm(targetPtr)    
+        revisionControlRm(targetPtr)
 
     def execUnstageAddCommand (self, unstageCmd):
         sourcePtr = convertTargetStr(unstageCmd.source, self.stageView)
-        targetPtr = convertTargetStr(unstageCmd.target, self.treeView)
-        revisionControlMv(sourcePtr, targetPtr)
+        targetPtr = convertTargetStr(unstageCmd.treeParent, self.treeView)
+        revisionControlMove(sourcePtr, targetPtr)
         self.resetForTaskInvalidation()
 
     def raiseUnknownCommand (self, subCommand):
