@@ -70,4 +70,6 @@ def fileExists (filePath):
     return os.path.isfile(filePath)
 
 def pullDirectories (parentDir):
-    return filter(os.path.isdir, os.listdir(parentDir))
+    listEntries = os.listdir(parentDir)
+    fullListPath = map(lambda x: formSubDirectory(parentDir, x), listEntries)
+    return filter(os.path.isdir, fullListPath)

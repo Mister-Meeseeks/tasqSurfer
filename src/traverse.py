@@ -5,13 +5,15 @@ from treeView import *
 
 class TaskTree:
     def __init__ (self, taskPointer, depth):
-        self.taskAtom = assembleTaskAtom(taskPointer)
+        self.taskAtom = TaskAtomReadOnly(taskPointer)
         self.subTrees = []
         self.viewIdx = None
         self.depth = depth
 
     def sortSubTreesCreateDate (self):
-        self.sortSubTreesFn(lambda x,y: ineqToCmp(x.createDate, y.createDate))
+        self.sortSubTreesFn(lambda x,y: ineqToCmp\
+                                (x.taskProperties.createDate.value, \
+                                     y.taskProperties.createDate.value))
 
     def sortSubTreesFn (self, atomCmpFn):
         self.subTrees.sort(lambda x,y: atomCmpFn(x.taskAtom, y.taskAtom))
@@ -25,12 +27,12 @@ def ineqToCmp (x, y):
     return 1 if x > y else -1
 
 def traverseView (treeView):
-    return traverseViewChild(treeView, "")
+    return traverseViewPath(treeView, treeView.relativeLocation.getFullPath())
 
-def traverseViewChild (treeView, childPath):
-    topPointer = TaskPointer(treeView.relativeLocation.getFullChild(childPath))
-    topTask = assembleTaskAtom(topPointer)
-    return organizeTraverse(traverseTask(topTask, 0))
+def traverseViewPath (treeView, taskPath):
+    treeView.userIdxView.resetIdxToPointer()
+    topPointer = TaskPointer(taskPath)
+    return organizeTraverse(traverseTask(topPointer, 0), treeView)
 
 def organizeTraverse (taskTree, treeView):
     taskTree.sortSubTreesCreateDate()
@@ -39,7 +41,7 @@ def organizeTraverse (taskTree, treeView):
 
 def traverseTask (taskPointer, dirDepth):
     taskTree = TaskTree(taskPointer, dirDepth)
-    taskTree.subTrees = traverseSubTasks(taskTree, dirDepth+1)
+    taskTree.subTrees = traverseSubTasks(taskTree.taskAtom.subTasks, dirDepth+1)
     return taskTree
 
 def traverseSubTasks (subTasks, dirDepth):

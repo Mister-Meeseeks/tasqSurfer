@@ -29,3 +29,4 @@ def initAndCdRepoDir (repoPath):
 
 def initRepoRevision (repoPath):
     revisionControlInit(repoPath)
+

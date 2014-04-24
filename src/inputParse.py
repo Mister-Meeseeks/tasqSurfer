@@ -16,7 +16,7 @@ moveCommandKeywords = ["move", "mv"]
 doneCommandKeywords = ["done"]
 rmCommandKeywords = ["rm", "cancel"]
 stageCommandKeywords = ["stage"]
-unstageCommandKeywrods = ["unstage"]
+unstageCommandKeywords = ["unstage"]
 
 class AddCommand:
     def __init__ (self, cmdWords):
@@ -26,11 +26,11 @@ class AddCommand:
 
     def parseFlags (self, cmdWords):
         parser = OptionParser()
-        parser.add_option("--parentTask", "-p", default=False)
-        parser.parse_args(cmdWords)
+        parser.add_option("--parentTask", "-p", default="")
+        return parser.parse_args(cmdWords)
 
-    def parserOpts (self, opts):
-        self.parentTarget = opt.parentTask
+    def parseOpts (self, opts):
+        self.parentTarget = opts.parentTask
         
     def parseArgs (self, args):
         self.name = args[0]
@@ -74,7 +74,7 @@ def convertTargetStr (targetStr, treeView):
 
 def convertTargetIdxStrToPointer (targetStr, treeView):
     targetIdx = int(targetStr)
-    return treeView.userIdxView.userIdxToPointer[targetIdx]
+    return treeView.userIdxView.userIdxToPointer.value[targetIdx].path
 
 def convertTargetPathStrToPointer (targetStr, treeView):
     return treeView.relativeLocation.getFullChild(targetStr)

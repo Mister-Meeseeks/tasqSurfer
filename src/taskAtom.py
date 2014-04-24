@@ -24,6 +24,13 @@ class TaskPointer (DirectoryOwner):
     def __str__ (self):
         return self.path
 
+class TaskPropertiesReadOnly:
+    def __init__ (self, taskPointer):
+        self.description = FileReaderSingle(taskPointer.descriptionPath)
+        self.createDate = FileReaderSingle(taskPointer.createDatePath, dateFromStr)
+        self.blocks = FileReaderList(taskPointer.blockPath, blockFromStr)
+        self.taskID = FileReaderSingle(taskPointer.taskIDPath, int)
+
 class TaskProperties:
     def __init__ (self, taskPointer, taskIDTracker):
         self.description = FileStoreSingle(taskPointer.descriptionPath, "")
@@ -37,7 +44,7 @@ class TaskProperties:
 
     def incrementTaskIDIfUsed (self, taskIDTracker):
         if (self.taskID == taskIDTracker.getNextID()):
-            taskIDTracker.incrementID
+            taskIDTracker.incrementID()
 
     def saveToStore (self):
         self.taskID.saveToStore()
@@ -59,7 +66,7 @@ def dateToStr (d):
                                          d.minute, d.second, d.microsecond)
 
 def diffDateToNow (dateOne):
-    return diffDates(datetime.now() - dateOne)
+    return diffDates(nowDate(), dateOne)
 
 def diffDates (dateOne, dateTwo):
     dateDelta = dateOne - dateTwo
@@ -81,11 +88,17 @@ class TaskAtom:
         self.taskProperties = TaskProperties(taskPointer, taskIDTracker)
         self.subTasks = pullSubTasks(taskPointer)
 
+class TaskAtomReadOnly:
+    def __init__ (self, taskPointer):
+        self.taskPointer = taskPointer
+        self.taskProperties = TaskPropertiesReadOnly(taskPointer)
+        self.subTasks = pullSubTasks(taskPointer)
+        
 def addAndWriteTaskDescription (taskAtom, description):
-    taskAtom.taskProperties.description = description
-    taskAtom.taskProperties.writeToStore()
+    taskAtom.taskProperties.description.value = description
+    taskAtom.taskProperties.saveToStore()
     return taskAtom
     
-def createTaskPointerOnParent (parentPointer, atomName):
-    pointerPath = formSubDirectory(parentPointer.path, atomName)
+def createTaskPointerOnParent (parentPointerPath, atomName):
+    pointerPath = formSubDirectory(parentPointerPath, atomName)
     return TaskPointer(pointerPath)

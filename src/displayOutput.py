@@ -1,19 +1,22 @@
 #!/usr/bin/python
 
+from taskAtom import *
+
 def displayTree (traverseTree):
     displayParams = DisplayParams()
-    displayLines = converToDisplayLines(traverseTree, displayParams)
-    DisplayFieldOutputter(displayLines)
+    displayLines = convertToDisplayLines(traverseTree, displayParams)
+    DisplayFieldPrinter(displayLines)
 
 def convertToDisplayLines (traverseTree, displayParams):
+    x = DisplayHeaderFields()
     return [DisplayHeaderFields()] + \
         convertToBodyDisplayLines(traverseTree, displayParams)
 
-def convertToBodyDisplayLines (traverseTree, dislplayParams):
+def convertToBodyDisplayLines (traverseTree, displayParams):
     topFields = DisplayLineFields(traverseTree, displayParams)
     subFields = map(lambda t: convertToBodyDisplayLines(t, displayParams), \
                         traverseTree.subTrees)
-    return [topFields] + reduce(lambda x,y: x + y, subFields)
+    return [topFields] + reduce(lambda x,y: x + y, subFields, [])
 
 class DisplayParams:
     def __init__ (self):
@@ -21,40 +24,52 @@ class DisplayParams:
         self.descendSpaces = 2
         self.maxDescrChars = 100
 
-class DisplayFieldOutputer:
-    def __init__ (self, fieldLines):
-        self.deriveFieldLens(fieldLines):
-        self.printFieldLines(fieldLines)
+class DisplayFieldPrinter:
+    def __init__ (self, displayLines):
+        self.deriveFieldLens(displayLines)
+        self.printFieldLines(displayLines)
 
-    def deriveFieldLens (self, fieldLines)
+    def deriveFieldLens (self, displayLines):
         self.viewIdxLen = self.getFieldSize(displayLines, lambda x: x.viewIdx)
         self.nameLen = self.getFieldSize(displayLines, lambda x: x.name)
         self.ageLen = self.getFieldSize(displayLines, lambda x: x.age)
         self.descrLen = self.getFieldSize(displayLines, lambda x: x.descr)
 
     def getFieldSize (self, displayLines, getFn):
-        return max(map(getFn, displayLines))
+        return max(map(len, map(getFn, displayLines)))
 
-    def printFieldLines (self, fieldLines):
-        self.printHeaderLine(fieldLines[0])
-        self.printBodyLines(fieldLines[1:])
+    def printFieldLines (self, displayLines):
+        self.printHeaderLine(displayLines[0])
+        self.printBodyLines(displayLines[1:])
 
     def printHeaderLine (self, headerFieldLine):
         self.printFieldLine(headerFieldLine)
         self.printHeaderSep()
 
+    def printBodyLines (self, bodyLines):
+        for bodyLine in bodyLines:
+            self.printFieldLine(bodyLine)
+
+    def printHeaderSep (self):
+        print "%s  %s  %s  %s" % \
+            (repeatCharForLen("-", self.viewIdxLen),
+             repeatCharForLen("-", self.nameLen),
+             repeatCharForLen("-", self.ageLen),
+             repeatCharForLen("-", self.descrLen))
+
     def printFieldLine (self, fieldLine):
-        print "%s %s %s %s" % \
+        print "%s  %s  %s  %s" % \
             (self.formatField(fieldLine.viewIdx, self.viewIdxLen),
-             self.formatField(fieldLine.name, self.nameIdxLen),
+             self.formatField(fieldLine.name, self.nameLen),
              self.formatField(fieldLine.age, self.ageLen),
              self.formatField(fieldLine.descr, self.descrLen))
 
     def formatField (self, fieldStr, fieldLen):
-        return fieldStr + repeatSpaceForLen(fieldLen)
+        numFillerSpaces = fieldLen - len(fieldStr)
+        return fieldStr + repeatSpaceForLen(fieldLen - len(fieldStr))
 
 class DisplayHeaderFields:
-    def __init_ (self):
+    def __init__ (self):
         self.viewIdx = "Idx"
         self.name = "Name"
         self.age = "Age"
@@ -65,21 +80,21 @@ class DisplayLineFields:
         self.viewIdx = self.formViewIdxStr(taskTree, displayParams)
         self.name = self.formNameStr(taskTree, displayParams)
         self.age = self.formAgeStr(taskTree, displayParams)
-        self.descr = self.formDescr(taskTree, displayParams)
+        self.descr = self.formDescrStr(taskTree, displayParams)
 
     def formViewIdxStr (self, taskTree, displayParams):
-        return int(taskTree.viewIdx)
+        return str(taskTree.viewIdx)
 
     def formNameStr (self, taskTree, displayParams):
-        return repeatSpaceForLen(taskTree.depth * displayParams.descendSpaces)
+        return repeatSpaceForLen(taskTree.depth * displayParams.descendSpaces) \
             + taskTree.taskAtom.taskPointer.name
 
     def formDescrStr (self, taskTree, displayParams):
-        descr = taskTree.taskAtom.taskProperties.description
+        descr = taskTree.taskAtom.taskProperties.description.value
         return descr[:displayParams.maxDescrChars]
 
     def formAgeStr (self, taskTree, displayParams):
-        createDate = taskTree.taskAtom.taskProperties.createDate
+        createDate = taskTree.taskAtom.taskProperties.createDate.value
         (days, seconds) = diffDateToNow(createDate)
         if (days > 14):
             return "%dw" % (days / 7)
@@ -93,5 +108,8 @@ class DisplayLineFields:
             return "%ds" % seconds
 
 def repeatSpaceForLen (numSpaces):
-    return reduce(lambda x,y: x + " ", range(numSpaces), " ")
+    return repeatCharForLen(" ", numSpaces)
 
+def repeatCharForLen (charVal, numChars):
+    return reduce(lambda x,y: x + charVal, range(numChars), "")
+    

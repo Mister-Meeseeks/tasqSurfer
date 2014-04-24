@@ -7,4 +7,3 @@ from revisionControl import *
 
 changeDirToRepo()
 CommandExec().execCommand(sys.argv)
-revisionControlCommit(sys.argv)

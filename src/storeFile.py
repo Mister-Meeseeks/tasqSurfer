@@ -7,33 +7,54 @@ class DirectoryOwner:
         self.path = path
         createDirectoryIfNeeded(self.path)
 
-class FileStore:
-    def __init__ (self, filePath, dfltValue, convertFromReadFn, convertToWriteFn):
+class FileLoader:
+    def __init__ (self, filePath, convertFromReadFn):
+        self.filePath = filePath
+        self.convertFromReadFn = convertFromReadFn
+    def loadValue (self):
+        return self.convertFromReadFn(readStrings(self.filePath))
+
+class FileSaver:
+    def __init__ (self, filePath, convertToWriteFn):
         self.filePath = filePath
         self.convertToWriteFn = convertToWriteFn
-        self.convertFromReadFn = convertFromReadFn
-        self.value = self.loadInitValue(dfltValue)
-
     def saveToStore (self):
         self.saveValue(self.value)
-
     def saveValue (self, value):
         writeStrings(self.convertToWriteFn(value), self.filePath)
+
+class FileReader (FileLoader):
+    def __init__ (self, filePath, convertFromReadFn):
+        FileLoader.__init__(self, filePath, convertFromReadFn)
+        self.value = self.loadValue()
+
+class FileStore (FileLoader, FileSaver):
+    def __init__ (self, filePath, dfltValue, convertFromReadFn, convertToWriteFn):
+        FileLoader.__init__(self, filePath, convertFromReadFn)
+        FileSaver.__init__(self, filePath, convertToWriteFn)
+        self.value = self.loadInitValue(dfltValue)
 
     def loadInitValue (self, dfltVal):
         if (not fileExists(self.filePath)):
             self.saveValue(dfltVal)
         return self.loadValue()
 
-    def loadValue (self):
-        return self.convertFromReadFn(readStrings(self.filePath))
+class FileReaderList (FileReader):
+    def __init__ (self, filePath, fromStrFn = lambda x: x):
+        FileReader.__init__(self, filePath, \
+                                lambda x: map(fromStrFn, x))
 
 class FileStoreList (FileStore):
     def __init__ (self, filePath, dfltVal=[], \
                       fromStrFn = lambda x: x, toStrFn = str):
         FileStore.__init__(self, filePath, dfltVal, \
-                               lambda x: map(fromStrFn,x), \
-                               lambda x: map(toStrFn,x))
+                               lambda x: map(fromStrFn, x), \
+                               lambda x: map(toStrFn, x))
+
+class FileReaderSingle (FileReader):
+    def __init__ (self, filePath, fromStrFn = lambda x: x):
+        FileReader.__init__(self, filePath, \
+                                lambda x: fromStrFn(joinStringLines(x)))
 
 class FileStoreSingle (FileStore):
     def __init__ (self, filePath, dfltVal="", \
@@ -53,12 +74,13 @@ class FileStoreDict (FileStore):
     def dictFromStrs (self, dictStrs, keyFromStr, valFromStr):
         retDict = {}
         for dictStr in dictStrs:
-            dictFields = dictStr.split("\t")
+            dictFields = dictStr.rstrip().split("\t")
             retDict[keyFromStr(dictFields[0])] = valFromStr(dictFields[1])
         return retDict
 
-    def dictToStrs (self, dictStrs, keyToStr, valToStr):
-        return map(lambda x: "%s\t%s" % (keyToStr(x), valToStr(x)), dictStrs)
+    def dictToStrs (self, dictVal, keyToStr, valToStr):
+        return map(lambda x: "%s\t%s" % \
+                       (keyToStr(x), valToStr(dictVal[x])), dictVal)
         
 def writeStrings (dataStrs, filePath):
     outStream = open(filePath, 'w')
@@ -69,4 +91,4 @@ def readStrings (filePath):
     return open(filePath, 'r').readlines()
 
 def joinStringLines (dataStrs):
-    return "\n".join(dataStrs)
+    return "\n".join(map(lambda x: x.rstrip(), dataStrs))

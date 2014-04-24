@@ -18,14 +18,17 @@ class TreeView (DirectoryOwner):
 class UserIdxView (DirectoryOwner):
     def __init__ (self, userIdxViewPath):
         DirectoryOwner.__init__(self, userIdxViewPath)
-        self.userIdxToPointerPath = formUserIdxToPointerPath(self.path)
-        self.userIdxToPointer = FileStoreDict(self.userIdxToPointerPath, {},
-                                              int, TaskPointer)
+        self.userIdxToPointer = FileStoreDict\
+            (formUserIdxToPointerPath(self.path), {}, int, TaskPointer)
+        self.nextUserIdx = self.deriveNextUserIdx(self.userIdxToPointer.value)
+
+    def resetIdxToPointer (self):
+        self.userIdxToPointer.value = {}
         self.nextUserIdx = self.deriveNextUserIdx(self.userIdxToPointer.value)
 
     def addTaskPointer (self, taskPointer):
         lastUserIdx = self.nextUserIdx
-        self.userIdxToPointer[self.nextUserIdx] = taskPointer
+        self.userIdxToPointer.value[self.nextUserIdx] = taskPointer
         self.nextUserIdx = self.nextUserIdx + 1
         return lastUserIdx
 
@@ -65,12 +68,22 @@ class RelativeLocation (DirectoryOwner):
     def getFullChild (self, childPath):
         return self.appendPath(self.getFullPath(), childPath)
 
-    def changePath (self, pathStr):
+    def changePathRepo (self, pathStr):
+        self.changePathView(self.convertRepoPathToView(pathStr))
+
+    def convertRepoPathToView (self, pathStr):
+        baseIdx = len(self.baseLocationPath)
+        if (pathStr[:baseIdx] == self.baseLocationPath):
+            return pathStr[baseIdx:]
+        else:
+            raise Exception("Change path target %s not in view's tree" % pathStr)
+
+    def changePathView (self, pathStr):
         targetPath = self.formTargetPath(pathStr)
         self.subLocationPath.value = self.cleanPath(targetPath)
 
     def formTargetPath (self, pathStr):
-        pathStr if self.isAbsolutePath(pathStr) \
+        return pathStr if self.isAbsolutePath(pathStr) \
             else self.appendPath(self.subLocationPath.value, pathStr)
 
     def isAbsolutePath (self, pathStr):
@@ -81,7 +94,8 @@ class RelativeLocation (DirectoryOwner):
 
     def cleanPath (self, pathStr):
         pathFields = pathStr.split("/")
-        pathFields = filter(lambda x: len(x) == 0, pathFields)
-        pathFields = filter(lambda x: x == ".", pathFields)
-        pathFields = reduce(lambda x,y: x[:-1] if y == ".." else x + [y])
-        return pathFields
+        pathFields = filter(lambda x: len(x) > 0, pathFields)
+        pathFields = filter(lambda x: x != ".", pathFields)
+        pathFields = reduce(lambda x,y: x[:-1] if y == ".." else x + [y], 
+                            pathFields, [])
+        return "/".join(pathFields)
