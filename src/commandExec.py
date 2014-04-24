@@ -48,6 +48,8 @@ class CommandExec:
             self.execListCommand(ListCommand(subArgs))
         elif (subCommand in cdCommandKeywords):
             self.execCdCommand(CdCommand(subArgs))
+        elif (subCommand in pwdCommandKeywords):
+            self.execPwdCommand(PwdCommand(subArgs))
         elif (subCommand in moveCommandKeywords):
             self.execMoveCommand(MoveCommand(subArgs))
         elif (subCommand in doneCommandKeywords):
@@ -70,12 +72,15 @@ class CommandExec:
     def execListCommand (self, listCmd):
         listPointer = convertTargetStr(listCmd.target, self.treeView)
         taskTree = traverseViewPath(self.treeView, listPointer)
-        displayTree(taskTree)
+        displayTree(self.treeView, taskTree)
         
     def execCdCommand (self, cdCmd):
         cdPointer = convertTargetStr(cdCmd.target, self.treeView)
         self.treeView.relativeLocation.changePathRepo(cdPointer)
-        
+
+    def execPwdCommand (self, pwdCmd):
+        printRelativeLocation(self.treeView)
+                        
     def execMoveCommand (self, moveCmd):
         sourcePtr = convertTargetStr(moveCmd.source, self.treeView)
         targetPtr = convertTargetStr(moveCmd.target, self.treeView)
@@ -100,7 +105,7 @@ class CommandExec:
 
     def execStageListCommand (self, stageCmd):
         taskTree = traverseView(self.stageView)
-        displayTree(taskTree)
+        displayTreeTraverse(taskTree)
         
     def execStageAddCommand (self, stageCmd):
         parentPointer = convertTargetStr("", self.stageView)

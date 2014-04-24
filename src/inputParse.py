@@ -12,6 +12,7 @@ def extractSubCommandArgs (args):
 addCommandKeywords = ["add"]
 listCommandKeywords = ["ls", "list"]
 cdCommandKeywords = ["cd"]
+pwdCommandKeywords = ["pwd"]
 moveCommandKeywords = ["move", "mv"]
 doneCommandKeywords = ["done"]
 rmCommandKeywords = ["rm", "cancel"]

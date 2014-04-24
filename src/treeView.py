@@ -33,7 +33,7 @@ class UserIdxView (DirectoryOwner):
         return lastUserIdx
 
     def deriveNextUserIdx (self, userIdxToPointer):
-        maxUserIdx = 0
+        maxUserIdx = -1
         for userIdx in userIdxToPointer:
             maxUserIdx = max(maxUserIdx, userIdx)
         return maxUserIdx+1
@@ -60,6 +60,11 @@ class RelativeLocation (DirectoryOwner):
 
     def saveToStore (self):
         self.subLocationPath.saveToStore()
+
+    def getTreeLocation (self):
+        rootTreePath = ""
+        return self.appendPath\
+            (rootTreePath, self.cleanPath(self.subLocationPath.value))
 
     def getFullPath (self):
         return self.appendPath(self.baseLocationPath, \

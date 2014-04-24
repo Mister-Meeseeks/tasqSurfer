@@ -2,7 +2,11 @@
 
 from taskAtom import *
 
-def displayTree (traverseTree):
+def displayTree (treeView, traverseTree):
+    printRelativeLocation(treeView)
+    displayTreeTraverse(traverseTree)
+
+def displayTreeTraverse (traverseTree):
     displayParams = DisplayParams()
     displayLines = convertToDisplayLines(traverseTree, displayParams)
     DisplayFieldPrinter(displayLines)
@@ -10,11 +14,17 @@ def displayTree (traverseTree):
 def convertToDisplayLines (traverseTree, displayParams):
     x = DisplayHeaderFields()
     return [DisplayHeaderFields()] + \
-        convertToBodyDisplayLines(traverseTree, displayParams)
+        convertToBodyDisplay(traverseTree, displayParams)
+
+def convertToBodyDisplay (traverseTree, displayParams):
+    if (traverseTree.depth <= displayParams.maxDepth):
+        return convertToBodyDisplayLines(traverseTree, displayParams)
+    else:
+        return []
 
 def convertToBodyDisplayLines (traverseTree, displayParams):
     topFields = DisplayLineFields(traverseTree, displayParams)
-    subFields = map(lambda t: convertToBodyDisplayLines(t, displayParams), \
+    subFields = map(lambda t: convertToBodyDisplay(t, displayParams), \
                         traverseTree.subTrees)
     return [topFields] + reduce(lambda x,y: x + y, subFields, [])
 
@@ -47,8 +57,17 @@ class DisplayFieldPrinter:
         self.printHeaderSep()
 
     def printBodyLines (self, bodyLines):
-        for bodyLine in bodyLines:
-            self.printFieldLine(bodyLine)
+        #self.printRootBodyLine(bodyLines)
+        self.printNodeBodyLines(bodyLines)
+
+    def printRootBodyLine (self, bodyLines):
+        if (len(bodyLines) > 0):
+            self.printFieldLine(bodyLines[0])
+            self.printHeaderSep()
+
+    def printNodeBodyLines (self, bodyLines):
+        for bodyLine in bodyLines[1:]:
+            self.printFieldLine(bodyLine)        
 
     def printHeaderSep (self):
         print "%s  %s  %s  %s" % \
@@ -86,7 +105,8 @@ class DisplayLineFields:
         return str(taskTree.viewIdx)
 
     def formNameStr (self, taskTree, displayParams):
-        return repeatSpaceForLen(taskTree.depth * displayParams.descendSpaces) \
+        indentDepth = max((taskTree.depth - 1), 0)
+        return repeatSpaceForLen(indentDepth * displayParams.descendSpaces) \
             + taskTree.taskAtom.taskPointer.name
 
     def formDescrStr (self, taskTree, displayParams):
@@ -113,3 +133,6 @@ def repeatSpaceForLen (numSpaces):
 def repeatCharForLen (charVal, numChars):
     return reduce(lambda x,y: x + charVal, range(numChars), "")
     
+def printRelativeLocation (treeView):
+    loc = treeView.relativeLocation.getTreeLocation()
+    print "Tree location: %s" % loc
