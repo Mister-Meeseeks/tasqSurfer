@@ -3,7 +3,7 @@
 from taskAtom import *
 
 def displayTree (treeView, traverseTree):
-    printRelativeLocation(treeView)
+    printTargetLocation(treeView, traverseTree)
     displayTreeTraverse(traverseTree)
 
 def displayTreeTraverse (traverseTree):
@@ -135,4 +135,9 @@ def repeatCharForLen (charVal, numChars):
     
 def printRelativeLocation (treeView):
     loc = treeView.relativeLocation.getTreeLocation()
+    print "Tree location: %s" % loc
+
+def printTargetLocation (treeView, traverseTree):
+    taskPath = traverseTree.taskAtom.taskPointer.path
+    loc = treeView.relativeLocation.getTreeLocationRepo(taskPath)
     print "Tree location: %s" % loc

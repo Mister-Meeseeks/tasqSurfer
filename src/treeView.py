@@ -61,25 +61,30 @@ class RelativeLocation (DirectoryOwner):
     def saveToStore (self):
         self.subLocationPath.saveToStore()
 
-    def getTreeLocation (self):
-        rootTreePath = ""
-        return self.appendPath\
-            (rootTreePath, self.cleanPath(self.subLocationPath.value))
+    def getTreeLocation (self, childPath=""):
+        return self.cleanPath(self.getPathOnBase(childPath, ""))
+
+    def getTreeLocationRepo (self, repoPath):
+        viewPath = self.convertRepoPathToView(repoPath)
+        return self.getTreeLocation(viewPath)
 
     def getFullPath (self):
-        return self.appendPath(self.baseLocationPath, \
-                                   self.subLocationPath.value)
+        return self.getPathOnBase("", self.baseLocationPath)
 
     def getFullChild (self, childPath):
-        return self.getFullAbsolute(childPath) \
-            if self.isAbsolutePath(childPath) else \
-            self.getFullRelative(childPath)
+        return self.getPathOnBase(childPath, self.baseLocationPath)
 
-    def getFullAbsolute (self, childPath):
-        return self.appendPath(self.baseLocationPath, childPath)
-    
-    def getFullRelative (self, childPath):
-        return self.appendPath(self.getFullPath(), childPath)
+    def getPathOnBase (self, childPath, basePath):
+        return self.getAbsoluteOnBase(childPath, basePath) \
+            if self.isAbsolutePath(childPath) else \
+            self.getRelativeOnBase(childPath, basePath)
+
+    def getAbsoluteOnBase (self, childPath, basePath):
+        return self.appendPath(basePath, childPath)
+
+    def getRelativeOnBase (self, childPath, basePath):
+        subPath = self.appendPath(self.subLocationPath.value, childPath)
+        return self.appendPath(basePath, subPath)
 
     def changePathRepo (self, pathStr):
         self.changePathView(self.convertRepoPathToView(pathStr))
@@ -107,7 +112,7 @@ class RelativeLocation (DirectoryOwner):
 
     def cleanPath (self, pathStr):
         pathFields = pathStr.split("/")
-        pathFields = filter(lambda x: len(x) > 0, pathFields)
+        pathFields[1:] = filter(lambda x: len(x) > 0, pathFields[1:])
         pathFields = filter(lambda x: x != ".", pathFields)
         pathFields = reduce(lambda x,y: x[:-1] if y == ".." else x + [y], 
                             pathFields, [])
