@@ -110,7 +110,7 @@ def convertTargetStr (targetStr, treeView):
 
 def convertTargetIdxStrToPointer (targetStr, treeView):
     targetIdx = int(targetStr)
-    return treeView.userIdxView.userIdxToPointer.value[targetIdx].path
+    return treeView.userIdxView.userIdxToPointer.value[targetIdx]
 
 def convertTargetPathStrToPointer (targetStr, treeView):
     return treeView.relativeLocation.getFullChild(targetStr)

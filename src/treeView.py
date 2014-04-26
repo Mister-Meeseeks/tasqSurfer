@@ -19,7 +19,7 @@ class UserIdxView (DirectoryOwner):
     def __init__ (self, userIdxViewPath):
         DirectoryOwner.__init__(self, userIdxViewPath)
         self.userIdxToPointer = FileStoreDict\
-            (formUserIdxToPointerPath(self.path), {}, int, TaskPointer)
+            (formUserIdxToPointerPath(self.path), {}, int)
         self.nextUserIdx = self.deriveNextUserIdx(self.userIdxToPointer.value)
 
     def resetIdxToPointer (self):

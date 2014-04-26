@@ -125,17 +125,14 @@ class CommandExec:
         sourcePtr = convertTargetStr(moveCmd.source, self.treeView)
         targetPtr = convertTargetStr(moveCmd.target, self.treeView)
         revisionControlMove(sourcePtr, targetPtr)
-        self.resetForTaskInvalidation()
 
     def execDoneCommand (self, doneCmd):
         targetPtr = convertTargetStr(doneCmd.target, self.treeView)
         revisionControlRm(targetPtr)
-        self.resetForTaskInvalidation()
 
     def execRmCommand (self, rmCmd):
         targetPtr = convertTargetStr(rmCmd.target, self.treeView)
         revisionControlRm(targetPtr)
-        self.resetForTaskInvalidation()
 
     def execStageCommand (self, stageCmd):
         if (stageCmd.name == ""):
@@ -161,18 +158,13 @@ class CommandExec:
 
     def execUnstageRmCommand (self, unstageCmd):
         targetPtr = convertTargetStr(unstageCmd.source, self.stageView)
-        self.resetForTaskInvalidation()
         revisionControlRm(targetPtr)
 
     def execUnstageAddCommand (self, unstageCmd):
         sourcePtr = convertTargetStr(unstageCmd.source, self.stageView)
         targetPtr = convertTargetStr(unstageCmd.treeParent, self.treeView)
         revisionControlMove(sourcePtr, targetPtr)
-        self.resetForTaskInvalidation()
 
     def raiseUnknownCommand (self, subCommand):
         raise Exception("Uknown command type: %s" % subCommand)
 
-    def resetForTaskInvalidation (self):
-        self.treeView.userIdxView.resetIdxToPointer()
-        self.stageView.userIdxView.resetIdxToPointer()
