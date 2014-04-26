@@ -123,3 +123,25 @@ def isIdxTargetStr (targetStr):
     except ValueError:
         return False
 
+def isHistoryStepStr (historyStr):
+    return len(historyStr) > 0 and \
+        (historyStr[0] == '+' or historyStr[0] == '-')
+
+def convertHistoryStr (historyStr):
+    return convertNumericHistoryStr(historyStr) \
+        if isNumericHistoryStr(historyStr) else \
+        convertIterHistoryStr(historyStr)
+
+def convertNumericHistoryStr (historyStr):
+    numSteps = int(historyStr[1:])
+    stepDir = 1 if historyStr[0] == '+' else -1
+    return stepDir * numSteps
+
+def convertIterHistoryStr (historyStr):
+    numSteps = len(historyStr)
+    stepDir = 1 if historyStr[0] == '+' else -1
+    return stepDir * numSteps
+
+def isNumericHistoryStr (historyStr):
+    return (len(historyStr) > 1) and \
+        (not (historyStr[1] in ['+','-']))

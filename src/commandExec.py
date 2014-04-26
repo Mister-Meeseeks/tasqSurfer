@@ -117,12 +117,27 @@ class CommandExec:
         return tree
 
     def execCdCommand (self, cdCmd):
+        if (isHistoryStepStr(cdCmd.target)):
+            self.execCdHistoryCommand(cdCmd)
+        else:
+            self.execCdTargetCommand(cdCmd)
+
+    def execCdHistoryCommand (self, cdCmd):
+        histSteps = convertHistoryStr(cdCmd.target)
+        self.treeView.relativeLocation.stepNHistory(histSteps)
+        printRelativeLocation(self.treeView)
+
+    def execCdTargetCommand (self, cdCmd):
         cdPointer = convertTargetStr(cdCmd.target, self.treeView)
         self.treeView.relativeLocation.changePathRepo(cdPointer)
 
     def execCdListCommand (self, listCmd):
         self.execCdCommand(listCmd)
+        self.sanitizeListPostCd(listCmd)
         self.execListCommand(listCmd)
+
+    def sanitizeListPostCd (self, listCmd):
+        listCmd.target = ""
 
     def execPwdCommand (self, pwdCmd):
         printRelativeLocation(self.treeView)

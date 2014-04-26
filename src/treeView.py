@@ -134,14 +134,14 @@ class RelativeLocation (DirectoryOwner):
         self.subLocationPath.value = newLocation
 
     def stepBackHistory (self):
-        if (len(self.backSubLocation) > 0):
+        if (len(self.backSubLocation.value) > 0):
             self.pushToFwdHistory(self.subLocationPath.value)
             self.subLocationPath.value = self.popFromBackHistory()
         
     def stepFwdHistory (self):
-        if (len(self.fwdSubLocation) > 0):
+        if (len(self.fwdSubLocation.value) > 0):
             self.pushToBackHistory(self.subLocationPath.value)
-            self.subLocationPath = popFromFwdHistory()
+            self.subLocationPath.value = self.popFromFwdHistory()
 
     def stepNHistory (self, nSteps):
         for i in range(abs(nSteps)):
@@ -155,16 +155,16 @@ class RelativeLocation (DirectoryOwner):
         if (len(self.backSubLocation.value) > self.maxHistorySize):
             self.backSubLocation.value.pop(0)
 
-    def pushToFwdHistory (self, subLoction):
+    def pushToFwdHistory (self, subLocation):
         self.fwdSubLocation.value.append(subLocation)
 
     def popFromBackHistory (self):
-        self.popFromHistory(self,backSubLocation)
+        return self.popFromHistory(self.backSubLocation.value)
 
     def popFromFwdHistory (self):
-        self.popFromHistory(self.fwdSubLocation)
+        return self.popFromHistory(self.fwdSubLocation.value)
 
     def popFromHistory (self, historyStack):
-        retVal = self.historyStack[-1]
-        self.historyStack.pop(-1)
+        retVal = historyStack[-1]
+        historyStack.pop(-1)
         return retVal        
