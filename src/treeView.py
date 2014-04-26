@@ -116,4 +116,6 @@ class RelativeLocation (DirectoryOwner):
         pathFields = filter(lambda x: x != ".", pathFields)
         pathFields = reduce(lambda x,y: x[:-1] if y == ".." else x + [y], 
                             pathFields, [])
-        return "/".join(pathFields)
+        pathClean = "/".join(pathFields)
+        isRootClean = len(pathClean) > 0 or len(pathStr) == 0
+        return pathClean if isRootClean else "/"
