@@ -26,7 +26,12 @@ def convertToBodyDisplayLines (traverseTree, displayParams):
     topFields = DisplayLineFields(traverseTree, displayParams)
     subFields = map(lambda t: convertToBodyDisplay(t, displayParams), \
                         traverseTree.subTrees)
+    markDisplayLinesCensored(topFields, subFields, traverseTree)
     return [topFields] + reduce(lambda x,y: x + y, subFields, [])
+
+def markDisplayLinesCensored (topFields, subFields, traverseTree):
+    if (len(traverseTree.subTrees) > 0 and sum(map(len, subFields)) == 0):
+        topFields.markCensoredSubFields()
 
 class DisplayParams:
     def __init__ (self):
@@ -103,6 +108,9 @@ class DisplayLineFields:
 
     def formViewIdxStr (self, taskTree, displayParams):
         return str(taskTree.viewIdx)
+
+    def markCensoredSubFields (self):
+        self.name = self.name + " *"
 
     def formNameStr (self, taskTree, displayParams):
         indentDepth = max((taskTree.depth - 1), 0)
