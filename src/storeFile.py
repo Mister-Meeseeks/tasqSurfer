@@ -74,7 +74,7 @@ class FileStoreDict (FileStore):
     def dictFromStrs (self, dictStrs, keyFromStr, valFromStr):
         retDict = {}
         for dictStr in dictStrs:
-            dictFields = dictStr.rstrip().split("\t")
+            dictFields = dictStr.split("\t")
             retDict[keyFromStr(dictFields[0])] = valFromStr(dictFields[1])
         return retDict
 
@@ -88,7 +88,11 @@ def writeStrings (dataStrs, filePath):
         print >> outStream, dataStr
 
 def readStrings (filePath):
-    return open(filePath, 'r').readlines()
+    fileStrs = open(filePath, 'r').readlines()
+    return map(stripInputString, fileStrs)
+
+def stripInputString (dataStr):
+    return dataStr.rstrip()
 
 def joinStringLines (dataStrs):
-    return "\n".join(map(lambda x: x.rstrip(), dataStrs))
+    return "\n".join(map(lambda x: x, dataStrs))

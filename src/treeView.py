@@ -57,9 +57,14 @@ class RelativeLocation (DirectoryOwner):
         self.baseLocationPath = baseLocationPath
         self.subLocationPath = FileStoreSingle\
             (formSubLocationPath(storePath), "/")
+        self.backSubLocation = FileStoreList(formBackSubLocationPath(storePath))
+        self.fwdSubLocation = FileStoreList(formFwdSubLocationPath(storePath))
+        self.maxHistorySize = 100
 
     def saveToStore (self):
         self.subLocationPath.saveToStore()
+        self.backSubLocation.saveToStore()
+        self.fwdSubLocation.saveToStore()
 
     def getTreeLocation (self, childPath=""):
         return self.cleanPath(self.getPathOnBase(childPath, ""))
@@ -97,8 +102,11 @@ class RelativeLocation (DirectoryOwner):
             raise Exception("Change path target %s not in view's tree" % pathStr)
 
     def changePathView (self, pathStr):
+        self.stepNewHistory(self.deriveTargetSubLocation(pathStr))
+
+    def deriveTargetSubLocation (self, pathStr):
         targetPath = self.formTargetPath(pathStr)
-        self.subLocationPath.value = self.cleanPath(targetPath)
+        return self.cleanPath(targetPath)        
 
     def formTargetPath (self, pathStr):
         return pathStr if self.isAbsolutePath(pathStr) \
@@ -119,3 +127,44 @@ class RelativeLocation (DirectoryOwner):
         pathClean = "/".join(pathFields)
         isRootClean = len(pathClean) > 0 or len(pathStr) == 0
         return pathClean if isRootClean else "/"
+
+    def stepNewHistory (self, newLocation):
+        self.pushToBackHistory(self.subLocationPath.value)
+        self.fwdSubLocation.value = []
+        self.subLocationPath.value = newLocation
+
+    def stepBackHistory (self):
+        if (len(self.backSubLocation) > 0):
+            self.pushToFwdHistory(self.subLocationPath.value)
+            self.subLocationPath.value = self.popFromBackHistory()
+        
+    def stepFwdHistory (self):
+        if (len(self.fwdSubLocation) > 0):
+            self.pushToBackHistory(self.subLocationPath.value)
+            self.subLocationPath = popFromFwdHistory()
+
+    def stepNHistory (self, nSteps):
+        for i in range(abs(nSteps)):
+            if (nSteps > 0):
+                self.stepFwdHistory()
+            else:
+                self.stepBackHistory()
+
+    def pushToBackHistory (self, subLocation):
+        self.backSubLocation.value.append(subLocation)
+        if (len(self.backSubLocation.value) > self.maxHistorySize):
+            self.backSubLocation.value.pop(0)
+
+    def pushToFwdHistory (self, subLoction):
+        self.fwdSubLocation.value.append(subLocation)
+
+    def popFromBackHistory (self):
+        self.popFromHistory(self,backSubLocation)
+
+    def popFromFwdHistory (self):
+        self.popFromHistory(self.fwdSubLocation)
+
+    def popFromHistory (self, historyStack):
+        retVal = self.historyStack[-1]
+        self.historyStack.pop(-1)
+        return retVal        

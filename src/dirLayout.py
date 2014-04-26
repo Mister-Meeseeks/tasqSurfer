@@ -50,6 +50,10 @@ def formUserIdxToPointerPath (userIdxPath):
     return formFilePath(userIdxPath, "pointerMap")
 def formSubLocationPath (relPath):
     return formFilePath(relPath, "subLoc")
+def formBackSubLocationPath (relPath):
+    return formFilePath(relPath, "backLocs")
+def formFwdSubLocationPath (relPath):
+    return formFilePath(relPath, "fwdLocs")
 
 def retrieveSubDirectory (parentDir, subDir):
     fullDir = formSubDirectory(parentDir, subDir)
