@@ -44,7 +44,7 @@ class CommandExec:
     def execCommandArgs (self, subCommand, subArgs):
         if (subCommand in addCommandKeywords):
             self.execAddCommand(AddCommand(subArgs))
-        if (subCommand in modifyCommandKeywords):
+        elif (subCommand in modifyCommandKeywords):
             self.execModifyCommand(ModifyCommand(subArgs))
         elif (subCommand in listCommandKeywords):
             self.execListCommand(ListCommand(subArgs))
@@ -66,7 +66,7 @@ class CommandExec:
             self.raiseUnknownCommand(subCommand)
 
     def execAddCommand (self, addCmd):
-        parentPointer = convertTargetStr(addCmd.parentTarget, self.treeView)
+        parentPointer = convertTargetStr(addCmd.parentTask, self.treeView)
         taskPointer = createTaskPointerOnParent(parentPointer, addCmd.name)
         taskAtom = TaskAtom(taskPointer, self.taskIDTracker)
         self.modifyTaskProperties(taskAtom.taskProperties, addCmd)
@@ -78,7 +78,7 @@ class CommandExec:
 
     def modifyTaskProperties (self, taskProperties, modCmd):
         if (modCmd.descr != ""):
-            taskProprties.descr = modCmd.descr
+            taskProperties.descr = modCmd.descr
         if (modCmd.skeleton):
             taskProperties.blocks.value.skeleton = True
         elif (modCmd.skeletonOff):
@@ -91,10 +91,10 @@ class CommandExec:
             taskProperties.blocks.value.immediate = True
         elif (modCmd.immediateOff):
             taskProperties.blocks.value.immediate = False
-        if (modCmd.active):
-            taskProperties.blocks.value.active = True
-        elif (modCmd.activeOff):
-            taskProperties.blocks.value.active = False        
+        if (modCmd.essential):
+            taskProperties.blocks.value.essential = True
+        elif (modCmd.essentialOff):
+            taskProperties.blocks.value.essential = False        
         taskProperties.saveToStore()
 
     def execListCommand (self, listCmd):
@@ -111,7 +111,7 @@ class CommandExec:
         if (listCmd.immediate):
             filterTaskTree(lambda a: getTaskBlocks(a).immediate,tree)
         if (listCmd.essential):
-            filterTaskTree(lambda a: getTaskBlocks(a).essential,taskTree)
+            filterTaskTree(lambda a: getTaskBlocks(a).essential,tree)
         return tree
 
     def execCdCommand (self, cdCmd):
