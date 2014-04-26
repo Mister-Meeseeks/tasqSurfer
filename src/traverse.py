@@ -47,3 +47,22 @@ def traverseTask (taskPointer, dirDepth):
 def traverseSubTasks (subTasks, dirDepth):
     return map(lambda p: traverseTask(p, dirDepth), subTasks)
 
+def isAnySubMatch (isAtomMatch, areSubMatch):
+    return reduce(lambda x,y: x or y, areSubMatch, isAtomMatch)
+
+# This returns a binary, from filtering the tree and reducing, but it also
+# modifies the tree itself to prune the filtered sub-trees.
+def filterTaskTree (filterFn, taskTree, treeReduceFn=isAnySubMatch):
+    isAtomMatch = filterFn(taskTree.taskAtom)
+    areSubMatch = areSubTreesFiltered(filterFn, taskTree, treeReduceFn)
+    dropNonMatchingSubTrees(taskTree, areSubMatch)
+    return treeReduceFn(isAtomMatch, areSubMatch)
+
+def areSubTreesFiltered (filterFn, taskTree, treeReduceFn):
+    return map(lambda t: filterTaskTree(filterFn, t, treeReduceFn),
+               taskTree.subTrees)
+
+def dropNonMatchingSubTrees (taskTree, areSubMatch):
+    subNest = map(lambda x, m: [x] if m else [], \
+        taskTree.subTrees, areSubMatch)
+    taskTree.subTrees = reduce(lambda x,y: x+y, subNest, [])

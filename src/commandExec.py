@@ -44,6 +44,8 @@ class CommandExec:
     def execCommandArgs (self, subCommand, subArgs):
         if (subCommand in addCommandKeywords):
             self.execAddCommand(AddCommand(subArgs))
+        if (subCommand in modifyCommandKeywords):
+            self.execModifyCommand(ModifyCommand(subArgs))
         elif (subCommand in listCommandKeywords):
             self.execListCommand(ListCommand(subArgs))
         elif (subCommand in cdCommandKeywords):
@@ -67,13 +69,51 @@ class CommandExec:
         parentPointer = convertTargetStr(addCmd.parentTarget, self.treeView)
         taskPointer = createTaskPointerOnParent(parentPointer, addCmd.name)
         taskAtom = TaskAtom(taskPointer, self.taskIDTracker)
-        addAndWriteTaskDescription(taskAtom, addCmd.descr)
+        self.modifyTaskProperties(taskAtom.taskProperties, addCmd)
         
+    def execModifyCommand (self, modCmd):
+        targetPointer = convertTargetStr(modCmd.target, self.treeView)
+        taskAtom = TaskAtom(TaskPointer(targetPointer), self.taskIDTracker)
+        self.modifyTaskProperties(taskAtom.taskProperties, modCmd)
+
+    def modifyTaskProperties (self, taskProperties, modCmd):
+        if (modCmd.descr != ""):
+            taskProprties.descr = modCmd.descr
+        if (modCmd.skeleton):
+            taskProperties.blocks.value.skeleton = True
+        elif (modCmd.skeletonOff):
+            taskProperties.blocks.value.skeleton = False
+        if (modCmd.active):
+            taskProperties.blocks.value.active = True
+        elif (modCmd.activeOff):
+            taskProperties.blocks.value.active = False
+        if (modCmd.immediate):
+            taskProperties.blocks.value.immediate = True
+        elif (modCmd.immediateOff):
+            taskProperties.blocks.value.immediate = False
+        if (modCmd.active):
+            taskProperties.blocks.value.active = True
+        elif (modCmd.activeOff):
+            taskProperties.blocks.value.active = False        
+        taskProperties.saveToStore()
+
     def execListCommand (self, listCmd):
         listPointer = convertTargetStr(listCmd.target, self.treeView)
-        taskTree = traverseViewPath(self.treeView, listPointer)
+        taskTree = self.filterTreeForCommand(\
+            traverseViewPath(self.treeView, listPointer), listCmd)
         displayTree(self.treeView, taskTree)
         
+    def filterTreeForCommand (self, tree, listCmd):
+        if (not listCmd.skeleton):
+            filterTaskTree(lambda a: not getTaskBlocks(a).skeleton, tree)
+        if (listCmd.active):
+            filterTaskTree(lambda a: getTaskBlocks(a).active, tree)
+        if (listCmd.immediate):
+            filterTaskTree(lambda a: getTaskBlocks(a).immediate,tree)
+        if (listCmd.essential):
+            filterTaskTree(lambda a: getTaskBlocks(a).essential,taskTree)
+        return tree
+
     def execCdCommand (self, cdCmd):
         cdPointer = convertTargetStr(cdCmd.target, self.treeView)
         self.treeView.relativeLocation.changePathRepo(cdPointer)

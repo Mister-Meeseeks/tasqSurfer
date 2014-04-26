@@ -10,6 +10,7 @@ def extractSubCommandArgs (args):
     return args[2:]
 
 addCommandKeywords = ["add"]
+modifyCommandKeywords = ["mod", "modify"]
 listCommandKeywords = ["ls", "list"]
 cdCommandKeywords = ["cd"]
 pwdCommandKeywords = ["pwd"]
@@ -19,22 +20,51 @@ rmCommandKeywords = ["rm", "cancel"]
 stageCommandKeywords = ["stage"]
 unstageCommandKeywords = ["unstage"]
 
-class AddCommand:
+class FlagParser:
     def __init__ (self, cmdWords):
-        (opts, args) = self.parseFlags(cmdWords)
-        self.parseOpts(opts)
-        self.parseArgs(args)
+        (opts, self.cmdWords) = self.parseFlags(cmdWords)
+        self.convertOpts(opts)
 
     def parseFlags (self, cmdWords):
         parser = OptionParser()
         parser.add_option("--parentTask", "-p", default="")
+        parser.add_option("--skeleton", "-s",action="store_true", default=False)
+        parser.add_option("--active", "-a", action="store_true", default=False)
+        parser.add_option("--immediate","-I",action="store_true", default=False)
+        parser.add_option("--essential","-E",action="store_true", default=False)
+        parser.add_option("--skeletonOff", action="store_true", default=False)
+        parser.add_option("--activeOff", action="store_true", default=False)
+        parser.add_option("--immediateOff", action="store_true", default=False)
+        parser.add_option("--essentialOff", action="store_true", default=False)
         return parser.parse_args(cmdWords)
 
-    def parseOpts (self, opts):
-        self.parentTarget = opts.parentTask
+    def convertOpts (self, opts):
+        self.parentTask = opts.parentTask
+        self.skeleton = opts.skeleton
+        self.active = opts.active
+        self.immediate = opts.immediate
+        self.essential = opts.essential
+        self.skeletonOff = opts.skeletonOff
+        self.activeOff = opts.activeOff
+        self.immediateOff = opts.immediateOff
+        self.essentialOff = opts.essentialOff
+
+class AddCommand (FlagParser):
+    def __init__ (self, cmdWords):
+        FlagParser.__init__(self, cmdWords)
+        self.parseArgs(self.cmdWords)
         
     def parseArgs (self, args):
         self.name = args[0]
+        self.descr = args[1] if len(args) > 1 else ""
+
+class ModifyCommand (FlagParser):
+    def __init__ (self, cmdWords):
+        FlagParser.__init__ (self, cmdWords)
+        self.parseArgs(self.cmdWords)
+
+    def parseArgs (self, args):
+        self.target = args[0]
         self.descr = args[1] if len(args) > 1 else ""
 
 class MoveCommand:
@@ -50,9 +80,10 @@ class RemoveCommand:
     def __init__ (self, cmdWords):
         self.target = cmdWords[0]
 
-class ListCommand:
+class ListCommand (FlagParser):
     def __init__ (self, cmdWords):
-        self.target = cmdWords[0] if len(cmdWords) > 0 else ""
+        FlagParser.__init__(self, cmdWords)
+        self.target = self.cmdWords[0] if len(self.cmdWords) > 0 else ""
 
 class CdCommand:
     def __init__ (self, cmdWords):
@@ -90,4 +121,4 @@ def isIdxTargetStr (targetStr):
         return True
     except ValueError:
         return False
-        
+

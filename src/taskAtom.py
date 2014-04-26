@@ -3,6 +3,7 @@
 import datetime
 from storeFile import *
 from dirLayout import *
+from blockState import *
 
 class TaskPointer (DirectoryOwner):
     def __init__ (self, pointerPath):
@@ -28,7 +29,7 @@ class TaskPropertiesReadOnly:
     def __init__ (self, taskPointer):
         self.description = FileReaderSingle(taskPointer.descriptionPath)
         self.createDate = FileReaderSingle(taskPointer.createDatePath, dateFromStr)
-        self.blocks = FileReaderList(taskPointer.blockPath, blockFromStr)
+        self.blocks = FileReader(taskPointer.blockPath, BlockState)
         self.taskID = FileReaderSingle(taskPointer.taskIDPath, int)
 
 class TaskProperties:
@@ -36,8 +37,8 @@ class TaskProperties:
         self.description = FileStoreSingle(taskPointer.descriptionPath, "")
         self.createDate = FileStoreSingle(taskPointer.createDatePath, 
                                           nowDate(), dateFromStr, dateToStr)
-        self.blocks = FileStoreList(taskPointer.blockPath, [],
-                                    blockFromStr, blockToStr)
+        self.blocks = FileStore(taskPointer.blockPath, BlockState([]),
+                                blocksFromStr, blocksToStr)
         self.taskID = FileStoreSingle(taskPointer.taskIDPath, 
                                       taskIDTracker.getNextID(), int)
         self.incrementTaskIDIfUsed(taskIDTracker)
@@ -94,11 +95,9 @@ class TaskAtomReadOnly:
         self.taskProperties = TaskPropertiesReadOnly(taskPointer)
         self.subTasks = pullSubTasks(taskPointer)
         
-def addAndWriteTaskDescription (taskAtom, description):
-    taskAtom.taskProperties.description.value = description
-    taskAtom.taskProperties.saveToStore()
-    return taskAtom
-    
 def createTaskPointerOnParent (parentPointerPath, atomName):
     pointerPath = formSubDirectory(parentPointerPath, atomName)
     return TaskPointer(pointerPath)
+
+def getTaskBlocks (taskAtom):
+    return taskAtom.taskProperties.blocks.value
