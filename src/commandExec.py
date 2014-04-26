@@ -50,6 +50,8 @@ class CommandExec:
             self.execListCommand(ListCommand(subArgs))
         elif (subCommand in cdCommandKeywords):
             self.execCdCommand(CdCommand(subArgs))
+        elif (subCommand in cdListCommandKeywords):
+            self.execCdListCommand(ListCommand(subArgs))
         elif (subCommand in pwdCommandKeywords):
             self.execPwdCommand(PwdCommand(subArgs))
         elif (subCommand in moveCommandKeywords):
@@ -117,6 +119,10 @@ class CommandExec:
     def execCdCommand (self, cdCmd):
         cdPointer = convertTargetStr(cdCmd.target, self.treeView)
         self.treeView.relativeLocation.changePathRepo(cdPointer)
+
+    def execCdListCommand (self, listCmd):
+        self.execCdCommand(listCmd)
+        self.execListCommand(listCmd)
 
     def execPwdCommand (self, pwdCmd):
         printRelativeLocation(self.treeView)
