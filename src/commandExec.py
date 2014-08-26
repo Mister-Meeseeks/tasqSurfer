@@ -80,7 +80,7 @@ class CommandExec:
 
     def modifyTaskProperties (self, taskProperties, modCmd):
         if (modCmd.descr != ""):
-            taskProperties.descr = modCmd.descr
+            taskProperties.description.value = modCmd.descr
         if (modCmd.skeleton):
             taskProperties.blocks.value.skeleton = True
         elif (modCmd.skeletonOff):
@@ -96,7 +96,9 @@ class CommandExec:
         if (modCmd.essential):
             taskProperties.blocks.value.essential = True
         elif (modCmd.essentialOff):
-            taskProperties.blocks.value.essential = False        
+            taskProperties.blocks.value.essential = False
+        else:
+            taskProperties.blocks.value.essential = True
         taskProperties.saveToStore()
 
     def execListCommand (self, listCmd):
@@ -169,7 +171,8 @@ class CommandExec:
         parentPointer = convertTargetStr("", self.stageView)
         taskPointer = createTaskPointerOnParent(parentPointer, stageCmd.name)
         taskAtom = TaskAtom(taskPointer, self.taskIDTracker)
-        addAndWriteTaskDescription(taskAtom, stageCmd.descr)
+        self.modifyTaskProperties(taskAtom.taskProperties, stageCmd)
+        
                 
     def execUnstageCommand (self, unstageCmd):
         if (unstageCmd.treeParent == ""):

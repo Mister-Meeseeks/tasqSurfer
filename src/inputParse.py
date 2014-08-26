@@ -31,12 +31,16 @@ class FlagParser:
         parser.add_option("--parentTask", "-p", default="")
         parser.add_option("--skeleton", "-s",action="store_true", default=False)
         parser.add_option("--active", "-a", action="store_true", default=False)
-        parser.add_option("--immediate","-I",action="store_true", default=False)
-        parser.add_option("--essential","-E",action="store_true", default=False)
-        parser.add_option("--skeletonOff", action="store_true", default=False)
-        parser.add_option("--activeOff", action="store_true", default=False)
-        parser.add_option("--immediateOff", action="store_true", default=False)
-        parser.add_option("--essentialOff", action="store_true", default=False)
+        parser.add_option("--immediate","-i",action="store_true", default=False)
+        parser.add_option("--essential","-e",action="store_true", default=False)
+        parser.add_option("--skeletonOff","-S",
+                          action="store_true",default=False)
+        parser.add_option("--activeOff","-A",
+                          action="store_true", default=False)
+        parser.add_option("--immediateOff","-I",
+                          action="store_true", default=False)
+        parser.add_option("--essentialOff","-E",
+                          action="store_true", default=False)
         return parser.parse_args(cmdWords)
 
     def convertOpts (self, opts):
@@ -94,10 +98,11 @@ class PwdCommand:
     def __init__ (self, pwdWords):
         self.empty = None
 
-class StageCommand:
+class StageCommand (FlagParser):
     def __init__ (self, cmdWords):
-        self.name = cmdWords[0] if len(cmdWords) > 0 else ""
-        self.descr = cmdWords[1] if len(cmdWords) > 1 else ""
+        FlagParser.__init__(self, cmdWords)
+        self.name = self.cmdWords[0] if len(self.cmdWords) > 0 else ""
+        self.descr = self.cmdWords[1] if len(self.cmdWords) > 1 else ""
 
 class UnstageCommand:
     def __init__ (self, cmdWords):
