@@ -29,13 +29,13 @@ class FlagParser:
     def parseFlags (self, cmdWords):
         parser = OptionParser()
         parser.add_option("--parentTask", "-p", default="")
+        parser.add_option("--all", "-a",action="store_true", default=False)
         parser.add_option("--skeleton", "-s",action="store_true", default=False)
-        parser.add_option("--active", "-a", action="store_true", default=False)
+        parser.add_option("--directory", "-d",action="store_true",default=False)
+        parser.add_option("--active", "-j",action="store_true", default=False)
         parser.add_option("--immediate","-i",action="store_true", default=False)
         parser.add_option("--essential","-e",action="store_true", default=False)
-        parser.add_option("--skeletonOff","-S",
-                          action="store_true",default=False)
-        parser.add_option("--activeOff","-A",
+        parser.add_option("--activeOff", "-J", 
                           action="store_true", default=False)
         parser.add_option("--immediateOff","-I",
                           action="store_true", default=False)
@@ -45,14 +45,20 @@ class FlagParser:
 
     def convertOpts (self, opts):
         self.parentTask = opts.parentTask
-        self.skeleton = opts.skeleton
-        self.active = opts.active
-        self.immediate = opts.immediate
-        self.essential = opts.essential
-        self.skeletonOff = opts.skeletonOff
-        self.activeOff = opts.activeOff
-        self.immediateOff = opts.immediateOff
-        self.essentialOff = opts.essentialOff
+        self.all = opts.all
+        self.skeleton = opts.skeleton or opts.directory
+        self.active = self.logicalConv(opts.active, opts.activeOff)
+        self.immediate = self.logicalConv(opts.immediate, opts.immediateOff)
+        self.essential = self.logicalConv(opts.essential, opts.essentialOff, \
+                                              not self.skeleton)
+
+    def logicalConv (self, onArg, offArg, dflt=False):
+        return self.logicalDflt(onArg, offArg) \
+            if dflt else self.logicalOff(onArg, offArg)
+    def logicalDflt (self, onArg, offArg):
+        return onArg or (not offArg)
+    def logicalOff (self, onArg, offArg):
+        return onArg and (not offArg)
 
 class AddCommand (FlagParser):
     def __init__ (self, cmdWords):

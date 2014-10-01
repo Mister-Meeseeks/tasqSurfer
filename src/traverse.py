@@ -66,3 +66,7 @@ def dropNonMatchingSubTrees (taskTree, areSubMatch):
     subNest = map(lambda x, m: [x] if m else [], \
         taskTree.subTrees, areSubMatch)
     taskTree.subTrees = reduce(lambda x,y: x+y, subNest, [])
+
+def filterTreeBlocks (filterFn, taskTree, treeReduceFn=isAnySubMatch):
+    blockFilt = lambda a: filterFn(getTaskBlocks(a))
+    return filterTaskTree(blockFilt, taskTree, treeReduceFn)

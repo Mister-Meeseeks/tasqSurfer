@@ -81,24 +81,10 @@ class CommandExec:
     def modifyTaskProperties (self, taskProperties, modCmd):
         if (modCmd.descr != ""):
             taskProperties.description.value = modCmd.descr
-        if (modCmd.skeleton):
-            taskProperties.blocks.value.skeleton = True
-        elif (modCmd.skeletonOff):
-            taskProperties.blocks.value.skeleton = False
-        if (modCmd.active):
-            taskProperties.blocks.value.active = True
-        elif (modCmd.activeOff):
-            taskProperties.blocks.value.active = False
-        if (modCmd.immediate):
-            taskProperties.blocks.value.immediate = True
-        elif (modCmd.immediateOff):
-            taskProperties.blocks.value.immediate = False
-        if (modCmd.essential):
-            taskProperties.blocks.value.essential = True
-        elif (modCmd.essentialOff):
-            taskProperties.blocks.value.essential = False
-        else:
-            taskProperties.blocks.value.essential = True
+        taskProperties.blocks.value.skeleton = modCmd.skeleton
+        taskProperties.blocks.value.active = modCmd.active
+        taskProperties.blocks.value.immediate = modCmd.immediate
+        taskProperties.blocks.value.essential = modCmd.essential
         taskProperties.saveToStore()
 
     def execListCommand (self, listCmd):
@@ -108,14 +94,17 @@ class CommandExec:
         displayTree(self.treeView, taskTree)
         
     def filterTreeForCommand (self, tree, listCmd):
-        if (not listCmd.skeleton):
-            filterTaskTree(lambda a: not getTaskBlocks(a).skeleton, tree)
+        return tree if listCmd.all \
+            else self.filterTreeBlocks(tree, listCmd)
+
+    def filterTreeBlocks (self, tree, listCmd):
+        filterTreeBlocks(lambda a: a.skeleton == listCmd.skeleton, tree)
         if (listCmd.active):
-            filterTaskTree(lambda a: getTaskBlocks(a).active, tree)
+            filterTreeBlocks(lambda a: a.active, tree)
         if (listCmd.immediate):
-            filterTaskTree(lambda a: getTaskBlocks(a).immediate,tree)
+            filterTreeBlocks(lambda a: a.immediate, tree)
         if (listCmd.essential):
-            filterTaskTree(lambda a: getTaskBlocks(a).essential,tree)
+            filterTreeBlocks(lambda a: a.essential, tree)
         return tree
 
     def execCdCommand (self, cdCmd):
