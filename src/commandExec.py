@@ -21,8 +21,7 @@ class CommandExec:
                                       formStageViewPath())
 
     def execCommand (self, args):
-        subCommand = extractSubCommand(args)
-        subArgs = extractSubCommandArgs(args)
+        (subCommand, subArgs) = extractSubCommand(args)
         self.execCommandArgs(subCommand, subArgs)
         self.finalizeExec(args)
 

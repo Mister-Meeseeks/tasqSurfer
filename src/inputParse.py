@@ -3,11 +3,20 @@
 from optparse import OptionParser
 
 def extractSubCommand (args):
-    return args[1] if len(args) > 1 \
-        else listCommandKeywords[0]
+    return extractSpecSubCommand(args) \
+        if hasSpecSubCommand(args) \
+        else emptySubCommand(args)
 
-def extractSubCommandArgs (args):
-    return args[2:]
+def emptySubCommand (args):
+    return (defaultKeyword, [])
+
+def extractSpecSubCommand (args):
+    isFirstFlag = args[1][0] == '-'
+    return (defaultKeyword, args[1:]) if \
+        isFirstFlag else (args[1], args[2:])
+
+def hasSpecSubCommand (args):
+    return len(args) > 1
 
 addCommandKeywords = ["add"]
 modifyCommandKeywords = ["mod", "modify"]
@@ -20,6 +29,7 @@ doneCommandKeywords = ["done"]
 rmCommandKeywords = ["rm", "cancel"]
 stageCommandKeywords = ["stage"]
 unstageCommandKeywords = ["unstage"]
+defaultKeyword = listCommandKeywords[1]
 
 class FlagParser:
     def __init__ (self, cmdWords):
