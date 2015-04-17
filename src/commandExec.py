@@ -36,7 +36,7 @@ class CommandExec:
 
     def commitRepository (self, args):
         revisionControlAdd(retrieveRepoTaskPath())
-        revisionControlAdd(retrieveRepoViewPath())
+        revisionControlIgnore(retrieveRepoViewPath())
         revisionControlAdd(retrieveRepoUniqueIDPath())
         revisionControlCommitWords(args)
 
