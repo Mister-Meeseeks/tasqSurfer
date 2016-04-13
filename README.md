@@ -3,6 +3,6 @@ Task management. From the command line. Structured in a recursive tree. Managed 
 
 ### Dependencies:
 
-*python (>= v2.7)
-*bash
-*git
+- python (>= v2.7)
+- bash
+- git
